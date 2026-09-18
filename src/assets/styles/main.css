@@ -65,6 +65,105 @@
   outline-offset: 2px;
 }
 
+/* ─── CMS body copy ──────────────────────────────────────────────────────── */
+/*
+   Portable Text arrives as bare <p>, <ul>, <h2>, <a> with no classes to hook
+   onto, and Tailwind's preflight strips their default margins and list markers.
+   Without this every body block renders as one undifferentiated wall of text.
+
+   Scoped to .prose-body rather than set globally so component markup keeps
+   Tailwind's reset and only editor-authored content is restyled.
+*/
+.prose-body {
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  /* ~70 characters is the comfortable reading measure; long-form CMS copy
+     otherwise stretches to the full container width. */
+  max-width: 68ch;
+}
+
+.prose-body > * + * {
+  margin-top: 1.15em;
+}
+
+.prose-body h2,
+.prose-body h3,
+.prose-body h4 {
+  color: var(--color-text);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: 2em;
+  text-wrap: balance;
+}
+
+.prose-body h2 { font-size: 1.5rem; }
+.prose-body h3 { font-size: 1.25rem; }
+.prose-body h4 { font-size: 1.0625rem; }
+
+/* A heading opening a block has the section's own spacing above it already. */
+.prose-body > :first-child {
+  margin-top: 0;
+}
+
+.prose-body a {
+  color: var(--color-primary);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.prose-body a:hover {
+  color: var(--color-primary-hover);
+}
+
+.prose-body strong {
+  color: var(--color-text);
+  font-weight: 650;
+}
+
+.prose-body ul,
+.prose-body ol {
+  padding-left: 1.5em;
+}
+
+.prose-body ul { list-style: disc; }
+.prose-body ol { list-style: decimal; }
+
+.prose-body li::marker {
+  color: var(--color-primary);
+}
+
+.prose-body li + li {
+  margin-top: 0.4em;
+}
+
+.prose-body blockquote {
+  border-left: 3px solid var(--color-secondary);
+  padding-left: 1.25em;
+  font-style: italic;
+  color: var(--color-text);
+}
+
+.prose-body hr {
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  margin-block: 2.5em;
+}
+
+/* On a dark ground the muted body colour drops below contrast; inherit instead. */
+.prose-body--invert {
+  color: inherit;
+  max-width: none;
+}
+
+.prose-body--invert h2,
+.prose-body--invert h3,
+.prose-body--invert h4,
+.prose-body--invert strong {
+  color: inherit;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
