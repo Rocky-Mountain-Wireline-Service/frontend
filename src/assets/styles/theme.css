@@ -1,66 +1,76 @@
+/*
+  Brand tokens.
+
+  Each token is declared once with `light-dark()` rather than as a light block
+  plus a duplicated dark override. The pair stays on one line, so a palette
+  change cannot update one theme and silently leave the other behind — which is
+  how the previous dark values drifted into being unreadable.
+
+  `color-scheme: light dark` makes the system preference the default; the
+  [data-theme] attributes below let an explicit choice win in either direction.
+*/
+
 :root {
-  --color-primary: #710a0c;
-  --color-primary-hover: #4c0708;
-  --color-primary-light: #ec282c;
-  --color-secondary: #d6a616;
-  --color-secondary-hover: #b18912;
-  --color-accent: #b8b8d1;
-  --color-accent-hover: #9f9fc1;
-  --color-bg: #ffffff;
-  --color-bg-secondary: #f5f3f4;
-  --color-bg-tertiary: #ede8ea;
-  --color-bg-card: #ffffff;
-  --color-bg-hover: #eee7e8;
-  --color-text: #1f2937;
-  --color-text-secondary: #4b5563;
-  --color-text-muted: #6b7280;
-  --color-text-inverse: #ffffff;
-  --color-border: #dfdce0;
-  --color-border-light: #efedef;
-  --color-success: #14b8a6;
-  --color-success-light: #f0fdfa;
-  --color-warning: #f97316;
-  --color-warning-light: #fff7ed;
-  --color-danger: #dc2626;
-  --color-danger-light: #fef2f2;
-  --color-sidebar-bg: #380506;
-  --color-sidebar-text: #e5e7eb;
-  --color-sidebar-hover: #540709;
-  --color-sidebar-active: #5a080a;
-  --color-surface: #f5f3f4;
+  color-scheme: light dark;
+
+  /* ── Brand ──────────────────────────────────────────────────────────────
+     `primary` is a SURFACE: white sits on it (buttons, the locations band).
+     `primary-ink` is TEXT: it sits on the page (links, "Learn more", accents).
+
+     In light mode both are the brand red. In dark mode they must diverge —
+     #710a0c as text on a dark ground measures 1.8:1, so every link would be
+     effectively invisible. The ink value lightens the same hue to 6.1:1 on the
+     page background and 5.1:1 on cards. */
+  --color-primary: light-dark(#710a0c, #a00e11);
+  --color-primary-hover: light-dark(#4c0708, #b81417);
+  --color-primary-ink: light-dark(#710a0c, #f36d6f);
+  --color-primary-ink-hover: light-dark(#4c0708, #ff9ea0);
+
+  --color-secondary: light-dark(#d6a616, #eabd35);
+  --color-secondary-hover: light-dark(#b18912, #f0c94a);
+  --color-accent: light-dark(#b8b8d1, #d7d7e5);
+
+  /* ── Surfaces ───────────────────────────────────────────────────────── */
+  --color-bg: light-dark(#ffffff, #141826);
+  --color-bg-secondary: light-dark(#f5f3f4, #1c2230);
+  --color-bg-tertiary: light-dark(#ede8ea, #2a3142);
+  --color-bg-card: light-dark(#ffffff, #212836);
+  --color-bg-hover: light-dark(#eee7e8, #2d3444);
+
+  /* ── Text ───────────────────────────────────────────────────────────────
+     All three pass AA on both bg and bg-card in both themes. */
+  --color-text: light-dark(#1f2937, #f3f4f6);
+  --color-text-secondary: light-dark(#4b5563, #d1d5db);
+  --color-text-muted: light-dark(#6b7280, #9ca3af);
+  --color-text-inverse: light-dark(#ffffff, #111827);
+
+  /* ── Lines ──────────────────────────────────────────────────────────── */
+  --color-border: light-dark(#dfdce0, #3c3d4b);
+  --color-border-light: light-dark(#efedef, #343a49);
+
+  /* ── Status ─────────────────────────────────────────────────────────────
+     The `-light` variants are tinted grounds that status text sits on, so they
+     invert to deep tints rather than staying pale. */
+  --color-success: light-dark(#0f766e, #5eead4);
+  --color-success-light: light-dark(#f0fdfa, #042f2a);
+  --color-warning: light-dark(#c2410c, #fbbf24);
+  --color-warning-light: light-dark(#fff7ed, #422006);
+  --color-danger: light-dark(#b91c1c, #f87171);
+  --color-danger-light: light-dark(#fef2f2, #3f1212);
+
+  /* ── Footer ─────────────────────────────────────────────────────────────
+     A near-black red in both themes: the footer is a dark band by design, not
+     a surface that flips. */
+  --color-footer-bg: light-dark(#380506, #1a0203);
+  --color-footer-text: light-dark(#e5e7eb, #d1d5db);
+
+  /* ── Type ───────────────────────────────────────────────────────────── */
   --font-heading: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-body: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
   --border-radius: 0.25rem;
 }
 
-[data-theme="dark"] {
-  --color-primary: #a00e11;
-  --color-primary-hover: #c61115;
-  --color-primary-light: #39242f;
-  --color-secondary: #eabd35;
-  --color-secondary-hover: #eec95a;
-  --color-accent: #d7d7e5;
-  --color-accent-hover: #f0f0f5;
-  --color-bg: #141826;
-  --color-bg-secondary: #222835;
-  --color-bg-tertiary: #3a3e4e;
-  --color-bg-card: #212836;
-  --color-bg-hover: #3c3d4b;
-  --color-text: #f3f4f6;
-  --color-text-secondary: #d1d5db;
-  --color-text-muted: #9ca3af;
-  --color-text-inverse: #111827;
-  --color-border: #3c3d4b;
-  --color-border-light: #4d515f;
-  --color-success: #5eead4;
-  --color-success-light: #052e16;
-  --color-warning: #fbbf24;
-  --color-warning-light: #451a03;
-  --color-danger: #f87171;
-  --color-danger-light: #450a0a;
-  --color-sidebar-bg: #250304;
-  --color-sidebar-text: #d1d5db;
-  --color-sidebar-hover: #420607;
-  --color-sidebar-active: #a00e11;
-  --color-surface: #222835;
-}
+/* An explicit choice overrides the system preference, in both directions. */
+:root[data-theme='light'] { color-scheme: light; }
+:root[data-theme='dark'] { color-scheme: dark; }

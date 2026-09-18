@@ -1,22 +1,13 @@
 <script setup lang="ts">
 import { Phone, MapPin } from 'lucide-vue-next';
 import type { Location } from '@/types/content';
+import { formatPhone, telHref } from '@/lib/format';
 
 defineProps<{
   section: { heading?: string; locations?: Location[] };
 }>();
 
-/** Strip formatting for the tel: target while leaving the display text alone. */
-const telHref = (phone: string) => `tel:${phone.replace(/[^\d+]/g, '')}`;
 
-/** (970) 245-9828 reads better than 9702459828 and is easier to dial by eye. */
-function formatPhone(phone: string) {
-  const digits = phone.replace(/\D/g, '');
-  if (digits.length === 10) {
-    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-  }
-  return phone;
-}
 </script>
 
 <template>

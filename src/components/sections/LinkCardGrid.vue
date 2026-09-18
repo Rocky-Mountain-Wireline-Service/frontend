@@ -53,7 +53,7 @@ defineProps<{
                 <PortableText :value="card.body" />
               </div>
               <span
-                class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-primary)]"
+                class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-primary-ink)]"
               >
                 {{ card.link.label }}
                 <ArrowRight :size="16" class="transition-transform group-hover:translate-x-1" />

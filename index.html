@@ -19,6 +19,22 @@
     />
   </head>
   <body>
+    <!--
+      Applies the stored theme before first paint. The prerendered HTML carries
+      no data-theme, so without this a visitor who chose dark would see a white
+      page flash before hydration corrected it. Deliberately inline and
+      synchronous: a deferred script runs too late to prevent the flash.
+    -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('rmws-theme');
+          if (t === 'light' || t === 'dark') {
+            document.documentElement.setAttribute('data-theme', t);
+          }
+        } catch (e) {}
+      })();
+    </script>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>

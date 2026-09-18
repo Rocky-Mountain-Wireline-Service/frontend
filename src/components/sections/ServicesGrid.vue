@@ -51,7 +51,7 @@ defineProps<{
               <p v-if="service.summary" class="mt-3 flex-1 text-sm leading-relaxed text-[var(--color-text-secondary)]">
                 {{ service.summary }}
               </p>
-              <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-primary)]">
+              <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-primary-ink)]">
                 Learn more
                 <ArrowRight :size="16" class="transition-transform group-hover:translate-x-1" />
               </span>

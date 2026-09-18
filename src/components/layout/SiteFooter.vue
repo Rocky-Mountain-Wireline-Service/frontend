@@ -5,9 +5,14 @@ import { PortableText } from '@portabletext/vue';
 import { useSiteShell } from '@/composables/useSiteShell';
 import SmartLink from '@/components/ui/SmartLink.vue';
 import { useSocialIcons } from '@/composables/useSocialIcons';
+import { formatPhone, isTelHref } from '@/lib/format';
+import type { ContactCard } from '@/types/content';
 
 const site = useSiteShell();
 const { pathFor, labelFor } = useSocialIcons();
+
+const display = (card: ContactCard) =>
+  isTelHref(card.href) ? formatPhone(card.value) : card.value;
 
 const year = new Date().getFullYear();
 const copyright = computed(() =>
@@ -16,7 +21,7 @@ const copyright = computed(() =>
 </script>
 
 <template>
-  <footer class="bg-[var(--color-sidebar-bg)] text-[var(--color-sidebar-text)]">
+  <footer class="bg-[var(--color-footer-bg)] text-[var(--color-footer-text)]">
     <div class="mx-auto grid max-w-6xl gap-10 px-6 py-14 sm:grid-cols-2 lg:grid-cols-4">
       <div class="lg:col-span-2">
         <img
@@ -78,9 +83,9 @@ const copyright = computed(() =>
               :href="card.href"
               class="focus-ring-light transition-colors hover:text-[var(--color-secondary)]"
             >
-              {{ card.value }}
+              {{ display(card) }}
             </a>
-            <span v-else>{{ card.value }}</span>
+            <span v-else>{{ display(card) }}</span>
           </li>
         </ul>
       </div>

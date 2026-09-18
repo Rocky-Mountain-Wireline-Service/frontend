@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import { Menu, X } from 'lucide-vue-next';
+import { Menu, X, Sun, Moon, MonitorSmartphone } from 'lucide-vue-next';
 import { useSiteShell } from '@/composables/useSiteShell';
 import SmartLink from '@/components/ui/SmartLink.vue';
+import { useTheme } from '@/composables/useTheme';
 
 const site = useSiteShell();
 const route = useRoute();
 const mobileOpen = ref(false);
+const { preference, cycle, label: themeLabel } = useTheme();
 
 // Close the menu on navigation, so a link tapped in the drawer does not leave
 // it covering the page it just opened.
@@ -26,7 +28,7 @@ watch(() => route.fullPath, () => { mobileOpen.value = false; });
           width="160"
           height="36"
         />
-        <span v-else class="text-lg font-bold text-[var(--color-primary)]">{{ site.name }}</span>
+        <span v-else class="text-lg font-bold text-[var(--color-primary-ink)]">{{ site.name }}</span>
       </RouterLink>
 
       <nav class="hidden items-center gap-7 lg:flex" aria-label="Main">
@@ -34,7 +36,7 @@ watch(() => route.fullPath, () => { mobileOpen.value = false; });
           v-for="item in site.primaryNav"
           :key="item.href"
           :to="item.href"
-          class="focus-ring text-[0.9375rem] font-medium text-[var(--color-text)] transition-colors hover:text-[var(--color-primary)] [&.router-link-active]:text-[var(--color-primary)]"
+          class="focus-ring text-[0.9375rem] font-medium text-[var(--color-text)] transition-colors hover:text-[var(--color-primary-ink)] [&.router-link-active]:text-[var(--color-primary-ink)]"
         >
           {{ item.label }}
         </SmartLink>
@@ -47,6 +49,18 @@ watch(() => route.fullPath, () => { mobileOpen.value = false; });
         >
           Request a Quote
         </RouterLink>
+
+        <button
+          type="button"
+          class="focus-ring rounded-md p-1.5 text-[var(--color-text)] transition-colors hover:bg-[var(--color-bg-hover)]"
+          :title="themeLabel"
+          :aria-label="themeLabel"
+          @click="cycle"
+        >
+          <MonitorSmartphone v-if="preference === 'system'" :size="20" aria-hidden="true" />
+          <Sun v-else-if="preference === 'dark'" :size="20" aria-hidden="true" />
+          <Moon v-else :size="20" aria-hidden="true" />
+        </button>
 
         <button
           type="button"
@@ -72,7 +86,7 @@ watch(() => route.fullPath, () => { mobileOpen.value = false; });
         v-for="item in site.primaryNav"
         :key="item.href"
         :to="item.href"
-        class="focus-ring block py-2.5 font-medium text-[var(--color-text)] hover:text-[var(--color-primary)] [&.router-link-active]:text-[var(--color-primary)]"
+        class="focus-ring block py-2.5 font-medium text-[var(--color-text)] hover:text-[var(--color-primary-ink)] [&.router-link-active]:text-[var(--color-primary-ink)]"
       >
         {{ item.label }}
       </SmartLink>

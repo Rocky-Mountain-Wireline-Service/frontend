@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import SanityImage from '@/components/ui/SanityImage.vue';
+import { formatPhone, isTelHref } from '@/lib/format';
 import type { ContactCard } from '@/types/content';
 
 defineProps<{
   section: { heading?: string; cards?: ContactCard[] };
 }>();
+
+const display = (card: ContactCard) =>
+  isTelHref(card.href) ? formatPhone(card.value) : card.value;
 </script>
 
 <template>
@@ -39,11 +43,11 @@ defineProps<{
           <a
             v-if="card.href"
             :href="card.href"
-            class="focus-ring mt-2 block font-medium text-[var(--color-primary)] underline-offset-4 hover:underline"
+            class="focus-ring mt-2 block font-medium text-[var(--color-primary-ink)] underline-offset-4 hover:underline"
           >
-            {{ card.value }}
+            {{ display(card) }}
           </a>
-          <p v-else class="mt-2 font-medium text-[var(--color-text)]">{{ card.value }}</p>
+          <p v-else class="mt-2 font-medium text-[var(--color-text)]">{{ display(card) }}</p>
         </li>
       </ul>
     </div>

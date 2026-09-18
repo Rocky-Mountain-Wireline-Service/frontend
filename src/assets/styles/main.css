@@ -31,7 +31,7 @@
   }
 
   a {
-    color: var(--color-primary);
+    color: var(--color-primary-ink);
     text-decoration: none;
     transition: color 0.2s ease;
   }
@@ -55,7 +55,7 @@
 /* Light background: dark dashed outline */
 .focus-ring:focus-visible,
 :focus-visible {
-  outline: 3px dashed var(--color-primary);
+  outline: 3px dashed var(--color-primary-ink);
   outline-offset: 2px;
 }
 
@@ -107,14 +107,14 @@
 }
 
 .prose-body a {
-  color: var(--color-primary);
+  color: var(--color-primary-ink);
   font-weight: 500;
   text-decoration: underline;
   text-underline-offset: 0.2em;
 }
 
 .prose-body a:hover {
-  color: var(--color-primary-hover);
+  color: var(--color-primary-ink-hover);
 }
 
 .prose-body strong {
@@ -131,7 +131,7 @@
 .prose-body ol { list-style: decimal; }
 
 .prose-body li::marker {
-  color: var(--color-primary);
+  color: var(--color-primary-ink);
 }
 
 .prose-body li + li {
@@ -257,4 +257,4 @@
 .prose-cta li { margin-bottom: 0.25rem; display: list-item; }
 .prose-cta p { margin-bottom: 1rem; }
 .prose-cta strong { font-weight: 600; }
-.prose-cta a { color: var(--color-primary); text-decoration: underline; }
+.prose-cta a { color: var(--color-primary-ink); text-decoration: underline; }

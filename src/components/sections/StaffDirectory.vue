@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Mail, Phone, MapPin } from 'lucide-vue-next';
+import { formatPhone, telHref } from '@/lib/format';
 
 interface Person {
   name: string;
@@ -16,14 +17,7 @@ defineProps<{
   section: { heading?: string; people?: Person[] };
 }>();
 
-const telHref = (phone: string) => `tel:${phone.replace(/[^\d+]/g, '')}`;
 
-function formatPhone(phone: string) {
-  const digits = phone.replace(/\D/g, '');
-  return digits.length === 10
-    ? `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
-    : phone;
-}
 
 /**
  * The legacy data stored a hand-written DOM id per person. Deriving the anchor
@@ -53,7 +47,7 @@ const anchorId = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-'
           </p>
           <p
             v-if="person.region"
-            class="mt-2 inline-flex w-fit rounded-full bg-[var(--color-primary)]/10 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-[var(--color-primary)]"
+            class="mt-2 inline-flex w-fit rounded-full bg-[var(--color-primary-ink)]/10 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-[var(--color-primary-ink)]"
           >
             {{ person.region }}
           </p>
@@ -65,7 +59,7 @@ const anchorId = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-'
               <dd class="min-w-0">
                 <a
                   :href="`mailto:${person.email}`"
-                  class="focus-ring block truncate text-[var(--color-primary)] underline-offset-4 hover:underline"
+                  class="focus-ring block truncate text-[var(--color-primary-ink)] underline-offset-4 hover:underline"
                 >
                   {{ person.email }}
                 </a>
@@ -78,7 +72,7 @@ const anchorId = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-'
               <dd>
                 <a
                   :href="telHref(person.phone)"
-                  class="focus-ring text-[var(--color-primary)] underline-offset-4 hover:underline"
+                  class="focus-ring text-[var(--color-primary-ink)] underline-offset-4 hover:underline"
                 >
                   {{ formatPhone(person.phone) }}
                 </a>

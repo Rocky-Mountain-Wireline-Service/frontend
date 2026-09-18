@@ -19,7 +19,7 @@ export const createApp = ViteSSG(
       return { top: 0 };
     },
   },
-  ({ app, initialState, isClient }) => {
+  ({ app, router, initialState, isClient }) => {
     const pinia = createPinia();
     app.use(pinia);
 
@@ -27,6 +27,9 @@ export const createApp = ViteSSG(
     // restored here, so the browser reuses it instead of refetching.
     if (isClient) {
       pinia.state.value = (initialState.pinia as typeof pinia.state.value) || {};
+      // Browser-only: the prerender has no document to attach a script to, and
+      // build-time page views would be meaningless anyway.
+      void import('./lib/analytics').then(({ initAnalytics }) => initAnalytics(router));
     } else {
       initialState.pinia = pinia.state.value;
     }

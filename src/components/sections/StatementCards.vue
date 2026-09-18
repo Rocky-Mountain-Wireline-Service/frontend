@@ -32,7 +32,7 @@ defineProps<{
             sizes="72px"
             class-name="mb-5 h-16 w-16 object-contain"
           />
-          <h3 class="text-xl font-bold text-[var(--color-primary)]">{{ card.title }}</h3>
+          <h3 class="text-xl font-bold text-[var(--color-primary-ink)]">{{ card.title }}</h3>
           <div v-if="card.statement?.length" class="prose-body mt-4">
             <PortableText :value="card.statement" />
           </div>
