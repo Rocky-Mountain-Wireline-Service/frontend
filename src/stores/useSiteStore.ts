@@ -26,9 +26,7 @@ export const useSiteStore = defineStore('site', {
       { label: 'Safety', to: '/safety' },
       { label: 'Employment', to: '/employment' },
     ],
-    footerNav: [
-,
-    ],
+    footerNav: [],
     legalNav: [
       { label: 'Privacy Policy', to: '/privacy-policy' },
       { label: 'Terms & Conditions', to: '/terms-and-conditions' },
