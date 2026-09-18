@@ -58,11 +58,24 @@
   --color-danger: light-dark(#b91c1c, #f87171);
   --color-danger-light: light-dark(#fef2f2, #3f1212);
 
+  /* ── Headings ───────────────────────────────────────────────────────────
+     The live site sets headings in near-black rather than the body's blue-grey,
+     which is what gives its section titles their weight. Kept as its own token
+     so heading colour can move without dragging body copy with it. */
+  --color-heading: light-dark(#111111, #f5f5f5);
+
+  /* The 5px gold rule under every section heading is the strongest piece of
+     brand vocabulary on the site. */
+  --color-rule: light-dark(#d6a616, #eabd35);
+
   /* ── Footer ─────────────────────────────────────────────────────────────
-     A near-black red in both themes: the footer is a dark band by design, not
-     a surface that flips. */
-  --color-footer-bg: light-dark(#380506, #1a0203);
-  --color-footer-text: light-dark(#e5e7eb, #d1d5db);
+     Neutral charcoal with a navy utility bar, matching the live site. Both are
+     dark bands by design rather than surfaces that flip, so they darken
+     slightly in dark mode instead of inverting. */
+  --color-footer-bg: light-dark(#333333, #1f1f1f);
+  --color-footer-text: light-dark(#f3f4f6, #e5e7eb);
+  --color-footer-muted: light-dark(#b8b8b8, #a3a3a3);
+  --color-footer-bar: light-dark(#004075, #002d52);
 
   /* ── Type ───────────────────────────────────────────────────────────── */
   --font-heading: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;

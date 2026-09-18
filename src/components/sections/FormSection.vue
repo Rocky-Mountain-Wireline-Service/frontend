@@ -4,6 +4,7 @@ import { PortableText } from '@portabletext/vue';
 import { useForm } from '@/composables/useForm';
 import { CheckCircle2, AlertCircle, Paperclip } from 'lucide-vue-next';
 import type { DynamicForm, PortableText as PT } from '@/types/content';
+import SectionHeading from '@/components/ui/SectionHeading.vue';
 
 const props = defineProps<{
   section: { heading?: string; intro?: PT; form?: DynamicForm | null };
@@ -41,11 +42,9 @@ const INPUT_CLASS =
 </script>
 
 <template>
-  <section v-if="isActive" class="px-6 py-16 md:py-24">
+  <section v-if="isActive" class="px-6 py-12 md:py-20">
     <div class="mx-auto max-w-2xl">
-      <h2 v-if="section.heading" class="text-balance text-3xl font-bold sm:text-4xl">
-        {{ section.heading }}
-      </h2>
+      <SectionHeading v-if="section.heading">{{ section.heading }}</SectionHeading>
       <div v-if="section.intro?.length" class="prose-body mt-4">
         <PortableText :value="section.intro" />
       </div>

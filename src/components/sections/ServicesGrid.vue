@@ -4,6 +4,7 @@ import SanityImage from '@/components/ui/SanityImage.vue';
 import { RouterLink } from 'vue-router';
 import { ArrowRight } from 'lucide-vue-next';
 import type { Figure, PortableText as PT } from '@/types/content';
+import SectionHeading from '@/components/ui/SectionHeading.vue';
 
 defineProps<{
   section: {
@@ -15,14 +16,9 @@ defineProps<{
 </script>
 
 <template>
-  <section class="px-6 py-16 md:py-24">
+  <section class="px-6 py-12 md:py-16">
     <div class="mx-auto max-w-6xl">
-      <h2
-        v-if="section.heading"
-        class="text-balance text-center text-3xl font-bold sm:text-4xl"
-      >
-        {{ section.heading }}
-      </h2>
+      <SectionHeading v-if="section.heading" align="center">{{ section.heading }}</SectionHeading>
       <div
         v-if="section.intro?.length"
         class="prose-body mx-auto mt-4 max-w-2xl text-center"
@@ -30,7 +26,10 @@ defineProps<{
         <PortableText :value="section.intro" />
       </div>
 
-      <ul class="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      <ul
+        class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
+        :class="section.heading || section.intro?.length ? 'mt-10' : ''"
+      >
         <li v-for="service in section.services" :key="service._id" class="group">
           <RouterLink
             :to="`/services/${service.slug}`"
@@ -47,7 +46,9 @@ defineProps<{
               />
             </div>
             <div class="flex flex-1 flex-col p-6">
-              <h3 class="text-lg font-semibold">{{ service.title }}</h3>
+              <h3 class="font-[var(--font-heading)] text-base font-bold uppercase leading-snug text-[var(--color-heading)]">
+                {{ service.title }}
+              </h3>
               <p v-if="service.summary" class="mt-3 flex-1 text-sm leading-relaxed text-[var(--color-text-secondary)]">
                 {{ service.summary }}
               </p>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Mail, Phone, MapPin } from 'lucide-vue-next';
 import { formatPhone, telHref } from '@/lib/format';
+import SectionHeading from '@/components/ui/SectionHeading.vue';
 
 interface Person {
   name: string;
@@ -28,11 +29,9 @@ const anchorId = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-'
 </script>
 
 <template>
-  <section data-analytics-section="staff_directory" class="bg-[var(--color-bg-secondary)] px-6 py-16 md:py-24">
+  <section data-analytics-section="staff_directory" class="bg-[var(--color-bg-secondary)] px-6 py-12 md:py-16">
     <div class="mx-auto max-w-6xl">
-      <h2 v-if="section.heading" class="mb-12 text-center text-3xl font-bold sm:text-4xl">
-        {{ section.heading }}
-      </h2>
+      <SectionHeading v-if="section.heading" align="center" class="mb-10">{{ section.heading }}</SectionHeading>
 
       <ul class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <li

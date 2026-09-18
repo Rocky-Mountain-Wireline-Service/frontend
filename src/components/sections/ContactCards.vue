@@ -2,6 +2,7 @@
 import SanityImage from '@/components/ui/SanityImage.vue';
 import { formatPhone, isTelHref } from '@/lib/format';
 import type { ContactCard } from '@/types/content';
+import SectionHeading from '@/components/ui/SectionHeading.vue';
 
 defineProps<{
   section: { heading?: string; cards?: ContactCard[] };
@@ -12,11 +13,9 @@ const display = (card: ContactCard) =>
 </script>
 
 <template>
-  <section data-analytics-section="contact_cards" class="px-6 py-14 md:py-20">
+  <section data-analytics-section="contact_cards" class="px-6 py-10 md:py-12">
     <div class="mx-auto max-w-5xl">
-      <h2 v-if="section.heading" class="mb-10 text-center text-3xl font-bold sm:text-4xl">
-        {{ section.heading }}
-      </h2>
+      <SectionHeading v-if="section.heading" align="center" class="mb-10">{{ section.heading }}</SectionHeading>
 
       <ul class="grid gap-6 sm:grid-cols-3">
         <li

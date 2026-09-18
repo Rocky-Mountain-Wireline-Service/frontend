@@ -1,44 +1,42 @@
 <script setup lang="ts">
-import { Phone, MapPin } from 'lucide-vue-next';
-import type { Location } from '@/types/content';
+import SectionHeading from '@/components/ui/SectionHeading.vue';
 import { formatPhone, telHref } from '@/lib/format';
+import type { Location } from '@/types/content';
 
 defineProps<{
   section: { heading?: string; locations?: Location[] };
 }>();
-
-
 </script>
 
 <template>
-  <section data-analytics-section="locations" class="bg-[var(--color-primary)] px-6 py-16 text-white md:py-20">
-    <div class="mx-auto max-w-5xl">
-      <h2 v-if="section.heading" class="text-center text-3xl font-bold sm:text-4xl">
+  <!--
+    An inset band rather than a full-bleed one. On the live site this block sits
+    within the page's gutters, which stops the strong red from cutting the page
+    in half and keeps it reading as a card of information.
+  -->
+  <section data-analytics-section="locations" class="px-6 pb-6 pt-10 md:pb-8 md:pt-12">
+    <div class="mx-auto max-w-6xl rounded-md bg-[var(--color-primary)] px-6 py-10 text-white md:px-12">
+      <SectionHeading v-if="section.heading" align="center" invert class="mb-8">
         {{ section.heading }}
-      </h2>
+      </SectionHeading>
 
-      <ul class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <li
-          v-for="loc in section.locations"
-          :key="`${loc.city}-${loc.state}`"
-          class="rounded-lg bg-white/10 p-6 ring-1 ring-white/15 backdrop-blur-sm"
-        >
-          <p class="flex items-start gap-2 text-lg font-semibold">
-            <MapPin :size="20" class="mt-0.5 shrink-0 text-[var(--color-secondary)]" aria-hidden="true" />
-            <span>
-              {{ loc.city }}, {{ loc.state }}
-              <span v-if="loc.streetAddress" class="mt-1 block text-sm font-normal text-white/75">
-                {{ loc.streetAddress }}<template v-if="loc.postalCode">, {{ loc.postalCode }}</template>
-              </span>
-            </span>
+      <ul
+        class="flex flex-wrap justify-center gap-x-16 gap-y-8 text-center"
+        :class="(section.locations?.length ?? 0) > 3 ? 'sm:gap-x-12' : ''"
+      >
+        <li v-for="loc in section.locations" :key="`${loc.city}-${loc.state}`">
+          <p class="font-[var(--font-heading)] text-lg font-bold">
+            {{ loc.city }}, {{ loc.state }}
+          </p>
+          <p v-if="loc.streetAddress" class="mt-1 text-sm text-white/75">
+            {{ loc.streetAddress }}<template v-if="loc.postalCode">, {{ loc.postalCode }}</template>
           </p>
           <a
             v-if="loc.phone"
             :href="telHref(loc.phone)"
-            class="focus-ring-light mt-4 inline-flex items-center gap-2 font-medium text-white underline-offset-4 hover:text-[var(--color-secondary)] hover:underline"
+            class="focus-ring-light mt-1.5 inline-block font-semibold text-[var(--color-secondary)] underline-offset-4 hover:text-white hover:underline"
           >
-            <Phone :size="16" aria-hidden="true" />
-            <span>{{ formatPhone(loc.phone) }}</span>
+            {{ formatPhone(loc.phone) }}
           </a>
         </li>
       </ul>

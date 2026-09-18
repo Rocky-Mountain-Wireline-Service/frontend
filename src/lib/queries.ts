@@ -11,10 +11,11 @@ const FIGURE = `{ ..., alt, decorative, asset, crop, hotspot }`;
 const SECTIONS = `
   sections[]{
     ...,
-    _type == "heroSection" => { heading, intro, cta, image ${FIGURE} },
+    _type == "heroSection" => { heading, intro, cta, secondaryCta, image ${FIGURE} },
     _type == "bodyContent" => { heading, body, imageRight, image ${FIGURE} },
     _type == "linkCardGrid" => {
       heading,
+      layout,
       cards[]{ title, body, link, image ${FIGURE} }
     },
     _type == "servicesGrid" => {
