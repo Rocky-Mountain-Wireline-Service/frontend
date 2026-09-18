@@ -1,0 +1,66 @@
+:root {
+  --color-primary: #710a0c;
+  --color-primary-hover: #4c0708;
+  --color-primary-light: #ec282c;
+  --color-secondary: #d6a616;
+  --color-secondary-hover: #b18912;
+  --color-accent: #b8b8d1;
+  --color-accent-hover: #9f9fc1;
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f5f3f4;
+  --color-bg-tertiary: #ede8ea;
+  --color-bg-card: #ffffff;
+  --color-bg-hover: #eee7e8;
+  --color-text: #1f2937;
+  --color-text-secondary: #4b5563;
+  --color-text-muted: #6b7280;
+  --color-text-inverse: #ffffff;
+  --color-border: #dfdce0;
+  --color-border-light: #efedef;
+  --color-success: #14b8a6;
+  --color-success-light: #f0fdfa;
+  --color-warning: #f97316;
+  --color-warning-light: #fff7ed;
+  --color-danger: #dc2626;
+  --color-danger-light: #fef2f2;
+  --color-sidebar-bg: #380506;
+  --color-sidebar-text: #e5e7eb;
+  --color-sidebar-hover: #540709;
+  --color-sidebar-active: #5a080a;
+  --color-surface: #f5f3f4;
+  --font-heading: 'System UI', sans-serif;
+  --font-body: 'System UI', sans-serif;
+  --border-radius: 0.25rem;
+}
+
+[data-theme="dark"] {
+  --color-primary: #a00e11;
+  --color-primary-hover: #c61115;
+  --color-primary-light: #39242f;
+  --color-secondary: #eabd35;
+  --color-secondary-hover: #eec95a;
+  --color-accent: #d7d7e5;
+  --color-accent-hover: #f0f0f5;
+  --color-bg: #141826;
+  --color-bg-secondary: #222835;
+  --color-bg-tertiary: #3a3e4e;
+  --color-bg-card: #212836;
+  --color-bg-hover: #3c3d4b;
+  --color-text: #f3f4f6;
+  --color-text-secondary: #d1d5db;
+  --color-text-muted: #9ca3af;
+  --color-text-inverse: #111827;
+  --color-border: #3c3d4b;
+  --color-border-light: #4d515f;
+  --color-success: #5eead4;
+  --color-success-light: #052e16;
+  --color-warning: #fbbf24;
+  --color-warning-light: #451a03;
+  --color-danger: #f87171;
+  --color-danger-light: #450a0a;
+  --color-sidebar-bg: #250304;
+  --color-sidebar-text: #d1d5db;
+  --color-sidebar-hover: #420607;
+  --color-sidebar-active: #a00e11;
+  --color-surface: #222835;
+}
