@@ -44,7 +44,7 @@ const copyright = computed(() =>
               :href="social.url"
               target="_blank"
               rel="noopener noreferrer"
-              class="focus-ring-light flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-[var(--color-secondary)] hover:text-[#1a1a1a]"
+              class="focus-ring-light flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-[var(--color-footer-text)] transition-colors hover:bg-[var(--color-secondary)] hover:text-[#1a1a1a]"
               :aria-label="labelFor(social.platform)"
             >
               <svg viewBox="0 0 24 24" class="h-[17px] w-[17px] fill-current" aria-hidden="true">
@@ -63,7 +63,7 @@ const copyright = computed(() =>
           <li v-for="item in site.footerNav" :key="item.href">
             <SmartLink
               :to="item.href"
-              class="focus-ring-light transition-colors hover:text-[var(--color-secondary)]"
+              class="focus-ring-light text-[var(--color-footer-text)] transition-colors hover:text-[var(--color-secondary)]"
             >
               {{ item.label }}
             </SmartLink>
@@ -81,7 +81,7 @@ const copyright = computed(() =>
             <a
               v-if="card.href"
               :href="card.href"
-              class="focus-ring-light transition-colors hover:text-[var(--color-secondary)]"
+              class="focus-ring-light text-[var(--color-footer-text)] transition-colors hover:text-[var(--color-secondary)]"
             >
               {{ display(card) }}
             </a>
@@ -102,7 +102,7 @@ const copyright = computed(() =>
             <li v-for="item in site.legalNav" :key="item.href">
               <RouterLink
                 :to="item.href"
-                class="focus-ring-light transition-colors hover:text-[var(--color-secondary)]"
+                class="focus-ring-light text-white/60 transition-colors hover:text-[var(--color-secondary)]"
               >
                 {{ item.label }}
               </RouterLink>
@@ -116,7 +116,7 @@ const copyright = computed(() =>
             :href="site.developerUrl"
             target="_blank"
             rel="noopener noreferrer"
-            class="focus-ring-light transition-colors hover:text-[var(--color-secondary)]"
+            class="focus-ring-light text-white/60 transition-colors hover:text-[var(--color-secondary)]"
           >
             {{ site.developerCredit }}
           </a>

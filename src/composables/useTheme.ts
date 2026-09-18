@@ -1,74 +1,76 @@
-import { computed, onMounted, ref } from 'vue';
-
-export type ThemePreference = 'light' | 'dark' | 'system';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 const STORAGE_KEY = 'rmws-theme';
-const ORDER: ThemePreference[] = ['system', 'light', 'dark'];
 
 /**
- * Shared across every caller: a module-level ref rather than per-instance
- * state, so the header toggle and anything else reading the theme cannot
- * disagree about what is currently applied.
+ * Dark mode as a plain on/off switch.
  *
- * Starts at 'system' to match the server-rendered HTML, which carries no
- * `data-theme`. Reading localStorage here instead would make the first client
- * render differ from the prerendered markup and trip a hydration mismatch —
- * the stored value is applied in onMounted, after hydration settles. The inline
- * script in index.html has already set the attribute by then, so there is no
- * visible flash.
+ * A three-way system/light/dark cycle was confusing: the third state had no
+ * obvious icon and people could not tell what the button would do next. The
+ * system preference still decides the *starting* state, it just is not
+ * something the visitor has to think about.
+ *
+ * Module-level refs, so the header toggle and anything else reading the theme
+ * cannot disagree about what is applied.
  */
-const preference = ref<ThemePreference>('system');
 
-function apply(value: ThemePreference) {
-  const root = document.documentElement;
-  if (value === 'system') {
-    root.removeAttribute('data-theme');
-  } else {
-    root.setAttribute('data-theme', value);
+/** null = the visitor has not chosen; follow the operating system. */
+const stored = ref<'light' | 'dark' | null>(null);
+const systemDark = ref(false);
+
+/** What is actually on screen: the choice if there is one, else the system. */
+const isDark = computed(() => (stored.value ? stored.value === 'dark' : systemDark.value));
+
+function read(): 'light' | 'dark' | null {
+  try {
+    const v = localStorage.getItem(STORAGE_KEY);
+    // 'system' was written by the earlier three-way toggle; treat it as unset.
+    return v === 'light' || v === 'dark' ? v : null;
+  } catch {
+    // Private mode and blocked site data both throw on access.
+    return null;
   }
 }
 
-function read(): ThemePreference {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'system';
-  } catch {
-    // Private mode and blocked site data both throw on access.
-    return 'system';
+function paint() {
+  const root = document.documentElement;
+  if (stored.value) {
+    root.setAttribute('data-theme', stored.value);
+  } else {
+    // Leave the attribute off so the CSS keeps following the system, and a
+    // visitor who changes their OS theme sees the site follow along.
+    root.removeAttribute('data-theme');
   }
 }
 
 export function useTheme() {
+  let media: MediaQueryList | null = null;
+  const onSystemChange = (e: MediaQueryListEvent) => { systemDark.value = e.matches; };
+
   onMounted(() => {
-    preference.value = read();
-    apply(preference.value);
+    media = window.matchMedia('(prefers-color-scheme: dark)');
+    systemDark.value = media.matches;
+    media.addEventListener('change', onSystemChange);
+
+    stored.value = read();
+    paint();
   });
 
-  function set(value: ThemePreference) {
-    preference.value = value;
-    apply(value);
+  onUnmounted(() => media?.removeEventListener('change', onSystemChange));
+
+  function toggle() {
+    // Flip whatever is on screen, which is what the button appears to promise —
+    // including the first press, when nothing has been chosen yet.
+    stored.value = isDark.value ? 'light' : 'dark';
+    paint();
     try {
-      localStorage.setItem(STORAGE_KEY, value);
+      localStorage.setItem(STORAGE_KEY, stored.value);
     } catch {
-      // Not being able to remember the choice is not a reason to ignore it.
+      // Not being able to remember the choice is no reason to ignore it.
     }
   }
 
-  /** Cycles system -> light -> dark, so the automatic option stays reachable. */
-  function cycle() {
-    const next = ORDER[(ORDER.indexOf(preference.value) + 1) % ORDER.length]!;
-    set(next);
-  }
+  const label = computed(() => (isDark.value ? 'Switch to light mode' : 'Switch to dark mode'));
 
-  const label = computed(() => {
-    const next = ORDER[(ORDER.indexOf(preference.value) + 1) % ORDER.length]!;
-    const names: Record<ThemePreference, string> = {
-      system: 'match system',
-      light: 'light',
-      dark: 'dark',
-    };
-    return `Theme: ${names[preference.value]}. Switch to ${names[next]}.`;
-  });
-
-  return { preference, set, cycle, label };
+  return { isDark, toggle, label };
 }

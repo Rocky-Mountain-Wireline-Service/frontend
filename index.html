@@ -31,6 +31,8 @@
           if (t === 'light' || t === 'dark') {
             document.documentElement.setAttribute('data-theme', t);
           }
+          // Anything else, including the 'system' value the earlier three-way
+          // toggle wrote, leaves the attribute off so the CSS follows the OS.
         } catch (e) {}
       })();
     </script>

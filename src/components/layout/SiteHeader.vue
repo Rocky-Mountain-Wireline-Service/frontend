@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import { Menu, X, Sun, Moon, SunMoon } from 'lucide-vue-next';
+import { Menu, X, Sun, Moon } from 'lucide-vue-next';
 import { useSiteShell } from '@/composables/useSiteShell';
 import SmartLink from '@/components/ui/SmartLink.vue';
 import { useTheme } from '@/composables/useTheme';
@@ -10,7 +10,7 @@ import { track } from '@/lib/analytics';
 const site = useSiteShell();
 const route = useRoute();
 const mobileOpen = ref(false);
-const { preference, cycle, label: themeLabel } = useTheme();
+const { isDark, toggle: toggleTheme, label: themeLabel } = useTheme();
 
 const onQuoteClick = (placement: string) => track('quote_cta_click', { placement });
 
@@ -59,10 +59,11 @@ watch(() => route.fullPath, () => { mobileOpen.value = false; });
           class="focus-ring rounded-md p-1.5 text-[var(--color-text)] transition-colors hover:bg-[var(--color-bg-hover)]"
           :title="themeLabel"
           :aria-label="themeLabel"
-          @click="cycle"
+          :aria-pressed="isDark"
+          @click="toggleTheme"
         >
-          <SunMoon v-if="preference === 'system'" :size="20" aria-hidden="true" />
-          <Sun v-else-if="preference === 'dark'" :size="20" aria-hidden="true" />
+          <!-- Shows the destination, not the current state: a sun means "go light". -->
+          <Sun v-if="isDark" :size="20" aria-hidden="true" />
           <Moon v-else :size="20" aria-hidden="true" />
         </button>
 
