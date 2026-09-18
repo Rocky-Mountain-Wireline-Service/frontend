@@ -1,8 +1,9 @@
 import { useHead } from '@unhead/vue';
-import { computed, unref, type MaybeRef } from 'vue';
+import { computed, unref, watch, type MaybeRef } from 'vue';
 import { useRoute } from 'vue-router';
 import { useSiteShell } from '@/composables/useSiteShell';
 import { sanityImage } from '@/composables/useSanityImage';
+import { trackPageView } from '@/lib/analytics';
 import type { Figure } from '@/types/content';
 
 const siteUrl = (import.meta.env.VITE_SITE_URL || 'https://rmws.com').replace(/\/$/, '');
@@ -15,6 +16,13 @@ export interface SeoInput {
   noIndex?: boolean;
   /** Used as the title when the document supplies none. */
   fallbackHeading?: string;
+  /** Page hero, used for sharing when no explicit social image is set. */
+  fallbackImage?: Figure | null;
+  /**
+   * False while the page is still fetching. The analytics page view waits for
+   * this, so a view is never recorded against a half-resolved title.
+   */
+  ready?: boolean;
 }
 
 /**
@@ -43,14 +51,32 @@ export function useSeo(input: MaybeRef<SeoInput> = {}) {
 
   const canonical = computed(() => `${siteUrl}${route.path === '/' ? '/' : route.path}`);
 
+  /**
+   * Falls back through the CMS rather than to a bundled file.
+   *
+   * This previously ended at `/og-image.png`, which was never added to the
+   * project — so every page advertised a social image that 404s, and every
+   * share rendered with a broken preview. Omitting the tag is better than
+   * pointing at nothing: platforms then fall back to their own treatment.
+   */
   const image = computed(() => {
-    const figure = seo.value.image ?? site.defaultSeo?.image;
-    if (figure?.asset) {
-      // Facebook and LinkedIn expect 1200x630 and crop anything else unpredictably.
-      return sanityImage(figure).width(1200).height(630).fit('crop').auto('format').url();
-    }
-    return `${siteUrl}/og-image.png`;
+    const figure = seo.value.image ?? seo.value.fallbackImage ?? site.defaultSeo?.image;
+    if (!figure?.asset) return '';
+    // Facebook and LinkedIn expect 1200x630 and crop anything else unpredictably.
+    return sanityImage(figure).width(1200).height(630).fit('crop').auto('format').url();
   });
+
+  // One view per path, sent once the page can name itself.
+  let lastTracked = '';
+  watch(
+    () => [route.fullPath, seo.value.ready !== false, title.value] as const,
+    ([path, isReady, resolvedTitle]) => {
+      if (!isReady || path === lastTracked) return;
+      lastTracked = path;
+      trackPageView(path, resolvedTitle);
+    },
+    { immediate: true, flush: 'post' }
+  );
 
   useHead({
     title,
@@ -63,12 +89,13 @@ export function useSeo(input: MaybeRef<SeoInput> = {}) {
       { property: 'og:title', content: title },
       { property: 'og:description', content: description },
       { property: 'og:url', content: canonical },
-      { property: 'og:image', content: image },
+      // An empty value is dropped by unhead, so no tag is emitted at all.
+      ...(image.value ? [{ property: 'og:image', content: image }] : []),
       { property: 'og:locale', content: 'en_US' },
       { name: 'twitter:card', content: 'summary_large_image' },
       { name: 'twitter:title', content: title },
       { name: 'twitter:description', content: description },
-      { name: 'twitter:image', content: image },
+      ...(image.value ? [{ name: 'twitter:image', content: image }] : []),
     ],
   });
 }

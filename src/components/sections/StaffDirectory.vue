@@ -28,7 +28,7 @@ const anchorId = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-'
 </script>
 
 <template>
-  <section class="bg-[var(--color-bg-secondary)] px-6 py-16 md:py-24">
+  <section data-analytics-section="staff_directory" class="bg-[var(--color-bg-secondary)] px-6 py-16 md:py-24">
     <div class="mx-auto max-w-6xl">
       <h2 v-if="section.heading" class="mb-12 text-center text-3xl font-bold sm:text-4xl">
         {{ section.heading }}

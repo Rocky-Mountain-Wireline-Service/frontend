@@ -29,6 +29,7 @@ useSeo(
     description: page.value?.seo?.description,
     image: page.value?.seo?.image,
     noIndex: page.value?.seo?.noIndex,
+    ready: Boolean(page.value),
   }))
 );
 </script>

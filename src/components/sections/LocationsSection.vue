@@ -11,7 +11,7 @@ defineProps<{
 </script>
 
 <template>
-  <section class="bg-[var(--color-primary)] px-6 py-16 text-white md:py-20">
+  <section data-analytics-section="locations" class="bg-[var(--color-primary)] px-6 py-16 text-white md:py-20">
     <div class="mx-auto max-w-5xl">
       <h2 v-if="section.heading" class="text-center text-3xl font-bold sm:text-4xl">
         {{ section.heading }}

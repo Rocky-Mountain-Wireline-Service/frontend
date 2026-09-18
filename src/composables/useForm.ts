@@ -1,4 +1,5 @@
 import { computed, reactive, ref } from 'vue';
+import { trackLead } from '@/lib/analytics';
 import type { DynamicForm, FormField } from '@/types/content';
 
 /** Netlify caps a function request at 6MB; base64 inflates a file by about a third. */
@@ -96,6 +97,8 @@ export function useForm(form: () => DynamicForm | null | undefined) {
     // Silently succeed for anything that trips the honeypot: telling a bot why
     // it was rejected only helps it try again.
     if (honeypot.value) {
+      // Reports success so a bot learns nothing, but records no lead: counting
+      // these would quietly inflate the client's conversion numbers.
       status.value = 'success';
       return;
     }
@@ -148,6 +151,7 @@ export function useForm(form: () => DynamicForm | null | undefined) {
       }
 
       status.value = 'success';
+      trackLead(def.title, window.location.pathname);
       reset();
     } catch (err) {
       formError.value = err instanceof Error ? err.message : 'Something went wrong.';

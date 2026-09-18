@@ -6,6 +6,7 @@ import { RouterLink } from 'vue-router';
 import { ArrowLeft } from 'lucide-vue-next';
 import { useSanityQuery } from '@/composables/useSanityQuery';
 import { useSeo } from '@/composables/useSeo';
+import { track } from '@/lib/analytics';
 import { SERVICE_BY_SLUG } from '@/lib/queries';
 import SanityImage from '@/components/ui/SanityImage.vue';
 import NotFound from '@/pages/NotFound.vue';
@@ -43,6 +44,7 @@ useSeo(
       `${service.value?.title ?? 'Wireline services'} from Rocky Mountain Wireline Service. Contact us to request a quote for your next job.`,
     image: service.value?.seo?.image || service.value?.image,
     noIndex: service.value?.seo?.noIndex,
+    ready: Boolean(service.value),
   }))
 );
 </script>
@@ -93,6 +95,7 @@ useSeo(
         <RouterLink
           to="/contact"
           class="focus-ring mt-5 inline-flex rounded-md bg-[var(--color-primary)] px-8 py-3 font-semibold text-white transition-colors hover:bg-[var(--color-primary-hover)]"
+          @click="track('quote_cta_click', { placement: 'service_detail', service: service?.title })"
         >
           Request a quote
         </RouterLink>

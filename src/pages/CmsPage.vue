@@ -3,9 +3,8 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useSanityQuery } from '@/composables/useSanityQuery';
 import { useSeo } from '@/composables/useSeo';
-import { useRevealObserver } from '@/composables/useRevealObserver';
 import PageSections from '@/components/layout/PageSections.vue';
-import type { Page } from '@/types/content';
+import type { Figure, Page } from '@/types/content';
 
 /**
  * Every composed page renders through this one component.
@@ -39,9 +38,9 @@ const { data: page } = useSanityQuery<Page>(
   { slug: slug.value }
 );
 
-const firstHeroHeading = computed(
-  () => page.value?.sections?.find((s) => s._type === 'heroSection')?.heading as string | undefined
-);
+const hero = computed(() => page.value?.sections?.find((s) => s._type === 'heroSection'));
+const firstHeroHeading = computed(() => hero.value?.heading as string | undefined);
+const firstHeroImage = computed(() => (hero.value?.image ?? null) as Figure | null);
 
 useSeo(
   computed(() => ({
@@ -49,11 +48,11 @@ useSeo(
     description: page.value?.seo?.description,
     image: page.value?.seo?.image,
     noIndex: page.value?.seo?.noIndex,
+    ready: Boolean(page.value),
     fallbackHeading: firstHeroHeading.value,
+    fallbackImage: firstHeroImage.value,
   }))
 );
-
-useRevealObserver(page);
 </script>
 
 <template>

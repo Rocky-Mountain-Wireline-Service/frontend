@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 @import './theme.css';
-@import './scroll-animations.css';
 
 /* ─── Base layer: global resets that Tailwind utilities can override ────── */
 @layer base {

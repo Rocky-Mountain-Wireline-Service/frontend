@@ -12,7 +12,7 @@ const display = (card: ContactCard) =>
 </script>
 
 <template>
-  <section class="px-6 py-14 md:py-20">
+  <section data-analytics-section="contact_cards" class="px-6 py-14 md:py-20">
     <div class="mx-auto max-w-5xl">
       <h2 v-if="section.heading" class="mb-10 text-center text-3xl font-bold sm:text-4xl">
         {{ section.heading }}
