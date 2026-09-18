@@ -1,261 +1,87 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { RouterLink } from 'vue-router';
-import { Menu, X, Sun, Moon } from 'lucide-vue-next';
-import { useSiteStore } from '@/stores/useSiteStore';
+import { ref, watch } from 'vue';
+import { RouterLink, useRoute } from 'vue-router';
+import { Menu, X } from 'lucide-vue-next';
+import { useSiteShell } from '@/composables/useSiteShell';
 import SmartLink from '@/components/ui/SmartLink.vue';
-import { useTheme } from '@/composables/useTheme';
 
-
-const site = useSiteStore();
-const { theme, toggle } = useTheme();
+const site = useSiteShell();
+const route = useRoute();
 const mobileOpen = ref(false);
 
-const currentLogo = computed(() => {
-  if (theme.value === 'dark' && site.darkLogo) return site.darkLogo;
-  return site.logo;
-});
+// Close the menu on navigation, so a link tapped in the drawer does not leave
+// it covering the page it just opened.
+watch(() => route.fullPath, () => { mobileOpen.value = false; });
 </script>
 
 <template>
-  <header class="site-header">
-    <div class="site-header__inner">
-      <!-- Left: Logo -->
-      <RouterLink to="/" class="site-header__logo" @click="mobileOpen = false">
-        <img v-if="currentLogo" :src="currentLogo" :alt="site.name" class="site-header__logo-img" />
-        <span v-else>{{ site.name }}</span>
+  <header class="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-bg)]/95 backdrop-blur">
+    <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-6">
+      <RouterLink to="/" class="focus-ring flex shrink-0 items-center" :aria-label="`${site.name} — home`">
+        <img
+          v-if="site.logo"
+          :src="site.logo"
+          :alt="site.logoAlt || site.name"
+          class="h-9 w-auto object-contain"
+          width="160"
+          height="36"
+        />
+        <span v-else class="text-lg font-bold text-[var(--color-primary)]">{{ site.name }}</span>
       </RouterLink>
 
-      <!-- Center: Nav links -->
-      <nav id="mobile-nav" class="site-header__nav" :class="{ 'site-header__nav--open': mobileOpen }">
-        <RouterLink
+      <nav class="hidden items-center gap-7 lg:flex" aria-label="Main">
+        <SmartLink
           v-for="item in site.primaryNav"
-          :key="item.to"
-          :to="item.to"
-          class="site-header__link"
-          @click="mobileOpen = false"
+          :key="item.href"
+          :to="item.href"
+          class="focus-ring text-[0.9375rem] font-medium text-[var(--color-text)] transition-colors hover:text-[var(--color-primary)] [&.router-link-active]:text-[var(--color-primary)]"
         >
           {{ item.label }}
-        </RouterLink>
-
-        <!-- CTA inside mobile menu -->
-        <SmartLink
-          v-if="site.ctaLabel"
-          :to="site.ctaUrl"
-          class="site-header__cta site-header__cta--mobile"
-          @click="mobileOpen = false"
-        >
-          {{ site.ctaLabel }}
         </SmartLink>
       </nav>
 
-      <!-- Right: CTA + auth + theme toggle + hamburger -->
-      <div class="site-header__actions">
-        <SmartLink
-          v-if="site.ctaLabel"
-          :to="site.ctaUrl"
-          class="site-header__cta site-header__cta--desktop"
+      <div class="flex items-center gap-3">
+        <RouterLink
+          to="/contact"
+          class="focus-ring hidden rounded-md bg-[var(--color-primary)] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-primary-hover)] sm:inline-flex"
         >
-          {{ site.ctaLabel }}
-        </SmartLink>
-
-        
+          Request a Quote
+        </RouterLink>
 
         <button
-          class="site-header__theme-toggle"
-          :aria-label="`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`"
-          @click="toggle"
-        >
-          <Sun v-if="theme === 'dark'" :size="20" />
-          <Moon v-else :size="20" />
-        </button>
-
-        <button
-          class="site-header__hamburger"
+          type="button"
+          class="focus-ring -mr-1 rounded-md p-1.5 text-[var(--color-text)] lg:hidden"
           :aria-label="mobileOpen ? 'Close menu' : 'Open menu'"
           :aria-expanded="mobileOpen"
           aria-controls="mobile-nav"
           @click="mobileOpen = !mobileOpen"
         >
-          <X v-if="mobileOpen" :size="24" />
-          <Menu v-else :size="24" />
+          <X v-if="mobileOpen" :size="24" aria-hidden="true" />
+          <Menu v-else :size="24" aria-hidden="true" />
         </button>
       </div>
     </div>
+
+    <nav
+      v-show="mobileOpen"
+      id="mobile-nav"
+      class="border-t border-[var(--color-border)] bg-[var(--color-bg)] px-6 py-4 lg:hidden"
+      aria-label="Main"
+    >
+      <SmartLink
+        v-for="item in site.primaryNav"
+        :key="item.href"
+        :to="item.href"
+        class="focus-ring block py-2.5 font-medium text-[var(--color-text)] hover:text-[var(--color-primary)] [&.router-link-active]:text-[var(--color-primary)]"
+      >
+        {{ item.label }}
+      </SmartLink>
+      <RouterLink
+        to="/contact"
+        class="focus-ring mt-3 block rounded-md bg-[var(--color-primary)] px-5 py-2.5 text-center font-semibold text-white sm:hidden"
+      >
+        Request a Quote
+      </RouterLink>
+    </nav>
   </header>
 </template>
-
-<style scoped>
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background-color: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.site-header__inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-  height: 4rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.site-header__logo {
-  font-family: var(--font-heading);
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-primary);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-}
-
-.site-header__logo:hover {
-  color: var(--color-primary);
-}
-
-.site-header__logo-img {
-  height: 2rem;
-  width: auto;
-  object-fit: contain;
-}
-
-.site-header__nav {
-  display: flex;
-  align-items: center;
-  gap: 1.75rem;
-}
-
-.site-header__link {
-  color: var(--color-text);
-  font-size: 0.9375rem;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.site-header__link:hover,
-.site-header__link.router-link-active {
-  color: var(--color-primary);
-}
-
-.site-header__link:focus-visible {
-  outline: 3px dashed var(--color-primary);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-.site-header__actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-shrink: 0;
-}
-
-.site-header__cta {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.5rem 1.25rem;
-  background-color: var(--color-primary);
-  color: var(--color-text-inverse);
-  font-size: 0.875rem;
-  font-weight: 600;
-  border-radius: var(--border-radius);
-  transition: background-color 0.2s ease;
-}
-
-.site-header__cta:hover {
-  background-color: var(--color-primary-hover, var(--color-secondary));
-  color: var(--color-text-inverse);
-}
-
-.site-header__cta--mobile {
-  display: none;
-}
-
-.site-header__theme-toggle {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--color-text);
-  padding: 0.375rem;
-  border-radius: var(--border-radius);
-  transition: background-color 0.2s ease;
-  display: flex;
-  align-items: center;
-}
-
-.site-header__theme-toggle:hover {
-  background-color: var(--color-border);
-}
-
-.site-header__theme-toggle:focus-visible {
-  outline: 3px dashed var(--color-primary);
-  outline-offset: 2px;
-}
-
-.site-header__hamburger {
-  display: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--color-text);
-  padding: 0.375rem;
-}
-
-.site-header__hamburger:focus-visible {
-  outline: 3px dashed var(--color-primary);
-  outline-offset: 2px;
-}
-
-.site-header__cta:focus-visible {
-  outline: 3px dashed var(--color-primary);
-  outline-offset: 2px;
-}
-
-.site-header__logo:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-@media (max-width: 768px) {
-  .site-header__hamburger {
-    display: flex;
-  }
-
-  .site-header__cta--desktop {
-    display: none;
-  }
-
-  .site-header__nav {
-    display: none;
-    position: absolute;
-    top: 4rem;
-    left: 0;
-    right: 0;
-    flex-direction: column;
-    background-color: var(--color-surface);
-    border-bottom: 1px solid var(--color-border);
-    padding: 1rem 1.5rem;
-    gap: 0.5rem;
-  }
-
-  .site-header__nav--open {
-    display: flex;
-  }
-
-  .site-header__cta--mobile {
-    display: inline-flex;
-    margin-top: 0.5rem;
-    justify-content: center;
-  }
-
-  .site-header__link {
-    padding: 0.5rem 0;
-  }
-}
-</style>

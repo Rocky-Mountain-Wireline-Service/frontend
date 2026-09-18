@@ -1,244 +1,129 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
-import { useSiteStore } from '@/stores/useSiteStore';
-import { useSanity } from '@/composables/useSanity';
-import { getSocialIcon } from '@/composables/useSocialIcons';
+import { PortableText } from '@portabletext/vue';
+import { useSiteShell } from '@/composables/useSiteShell';
 import SmartLink from '@/components/ui/SmartLink.vue';
+import { useSocialIcons } from '@/composables/useSocialIcons';
 
-const site = useSiteStore();
+const site = useSiteShell();
+const { pathFor, labelFor } = useSocialIcons();
+
 const year = new Date().getFullYear();
-
-const { data: socialDoc } = useSanity<{ links: { platform: string; url: string }[] }>(
-  `*[_type == "socialLinks"][0]{"links": coalesce(links, items)}`
+const copyright = computed(() =>
+  site.copyrightText ? `© ${year} ${site.copyrightText}` : `© ${year} ${site.name}`
 );
-const socialLinks = computed(() => {
-  const raw = socialDoc.value?.links || site.socialLinks;
-  return raw.map((l) => ({ ...l, platform: l.platform.toLowerCase() }));
-});
-
-const platformLabels: Record<string, string> = {
-  facebook: 'Facebook',
-  instagram: 'Instagram',
-  twitter: 'X',
-  linkedin: 'LinkedIn',
-  youtube: 'YouTube',
-  tiktok: 'TikTok',
-  github: 'GitHub',
-  pinterest: 'Pinterest',
-  threads: 'Threads',
-  bluesky: 'Bluesky',
-  mastodon: 'Mastodon',
-  nextdoor: 'Nextdoor',
-};
 </script>
 
 <template>
-  <footer class="site-footer">
-    <!-- Section 1: CTA Band -->
-    <div v-if="site.ctaFooterLabel || site.ctaLabel" class="cta-band">
-      <div class="cta-band__inner">
-        <h2 class="cta-band__heading">{{ site.ctaHeadline }}</h2>
-        <p class="cta-band__text">{{ site.ctaSubtext }}</p>
-        <SmartLink :to="site.ctaFooterUrl || site.ctaUrl" class="cta-band__button">
-          {{ site.ctaFooterLabel || site.ctaLabel }}
-        </SmartLink>
+  <footer class="bg-[var(--color-sidebar-bg)] text-[var(--color-sidebar-text)]">
+    <div class="mx-auto grid max-w-6xl gap-10 px-6 py-14 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="lg:col-span-2">
+        <img
+          v-if="site.footerLogo"
+          :src="site.footerLogo"
+          :alt="site.footerLogoAlt || site.name"
+          class="h-12 w-auto object-contain"
+          width="200"
+          height="48"
+        />
+        <p v-else class="text-lg font-bold text-white">{{ site.name }}</p>
+
+        <div v-if="site.footerMission?.length" class="footer-prose mt-5 max-w-md text-sm leading-relaxed">
+          <PortableText :value="site.footerMission" />
+        </div>
+
+        <ul v-if="site.socialLinks.length" class="mt-6 flex gap-3">
+          <li v-for="social in site.socialLinks" :key="social.url">
+            <a
+              :href="social.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="focus-ring-light flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-[var(--color-secondary)] hover:text-[#1a1a1a]"
+              :aria-label="labelFor(social.platform)"
+            >
+              <svg viewBox="0 0 24 24" class="h-[17px] w-[17px] fill-current" aria-hidden="true">
+                <path :d="pathFor(social.platform)" />
+              </svg>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <nav v-if="site.footerNav.length" aria-labelledby="footer-links-heading">
+        <h2 id="footer-links-heading" class="text-sm font-semibold uppercase tracking-wider text-white">
+          {{ site.footerLinksHeading || 'Quick Links' }}
+        </h2>
+        <ul class="mt-4 space-y-2.5 text-sm">
+          <li v-for="item in site.footerNav" :key="item.href">
+            <SmartLink
+              :to="item.href"
+              class="focus-ring-light transition-colors hover:text-[var(--color-secondary)]"
+            >
+              {{ item.label }}
+            </SmartLink>
+          </li>
+        </ul>
+      </nav>
+
+      <div v-if="site.footerContactCards.length">
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-white">
+          {{ site.footerContactHeading || 'Contact' }}
+        </h2>
+        <ul class="mt-4 space-y-3 text-sm">
+          <li v-for="card in site.footerContactCards" :key="card.title">
+            <span class="block text-xs uppercase tracking-wide text-white/50">{{ card.title }}</span>
+            <a
+              v-if="card.href"
+              :href="card.href"
+              class="focus-ring-light transition-colors hover:text-[var(--color-secondary)]"
+            >
+              {{ card.value }}
+            </a>
+            <span v-else>{{ card.value }}</span>
+          </li>
+        </ul>
       </div>
     </div>
 
-    <!-- Section 2: Bottom Bar -->
-    <div class="bottom-bar">
-      <div class="bottom-bar__inner">
-        <!-- Legal nav row -->
-        <nav v-if="site.legalNav.length" class="bottom-bar__legal">
-          <RouterLink
-            v-for="item in site.legalNav"
-            :key="item.to"
-            :to="item.to"
-            class="bottom-bar__legal-link"
-          >
-            {{ item.label }}
-          </RouterLink>
+    <div class="border-t border-white/10">
+      <div
+        class="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-5 text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <p>{{ copyright }}</p>
+
+        <nav v-if="site.legalNav.length" aria-label="Legal">
+          <ul class="flex flex-wrap gap-x-5 gap-y-1">
+            <li v-for="item in site.legalNav" :key="item.href">
+              <RouterLink
+                :to="item.href"
+                class="focus-ring-light transition-colors hover:text-[var(--color-secondary)]"
+              >
+                {{ item.label }}
+              </RouterLink>
+            </li>
+          </ul>
         </nav>
 
-        <!-- Copyright + Social row -->
-        <div class="bottom-bar__meta">
-          <p class="bottom-bar__copyright">
-            {{ site.copyrightText || `© ${year} ${site.name}. All rights reserved.` }}
-          </p>
-          <div v-if="socialLinks.length" class="bottom-bar__social">
-            <a
-              v-for="link in socialLinks"
-              :key="link.platform"
-              :href="link.url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="bottom-bar__social-link"
-              :aria-label="platformLabels[link.platform] || link.platform"
-            >
-              <svg v-if="getSocialIcon(link.platform)" class="bottom-bar__social-svg" viewBox="0 0 24 24" fill="currentColor">
-                <path :d="getSocialIcon(link.platform)!" />
-              </svg>
-              <span v-else class="bottom-bar__social-fallback">{{ (platformLabels[link.platform] || link.platform).charAt(0) }}</span>
-            </a>
-          </div>
-        </div>
+        <p v-if="site.developerCredit">
+          <a
+            v-if="site.developerUrl"
+            :href="site.developerUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="focus-ring-light transition-colors hover:text-[var(--color-secondary)]"
+          >
+            {{ site.developerCredit }}
+          </a>
+          <span v-else>{{ site.developerCredit }}</span>
+        </p>
       </div>
     </div>
   </footer>
 </template>
 
 <style scoped>
-.site-footer {
-  margin-top: auto;
-}
-
-/* ─── Section 1: CTA Band ─── */
-.cta-band {
-  background-color: #1f2937;
-  padding: 4rem 1.5rem;
-  text-align: center;
-}
-
-.cta-band__inner {
-  max-width: 48rem;
-  margin: 0 auto;
-}
-
-.cta-band__heading {
-  font-family: var(--font-heading);
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 0.75rem;
-}
-
-.cta-band__text {
-  font-size: 1.125rem;
-  color: #d1d5db;
-  margin-bottom: 2rem;
-}
-
-.cta-band__button {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.75rem 2rem;
-  background-color: #ffffff;
-  color: #111827;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 0.75rem;
-  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  outline: none;
-}
-
-.cta-band__button:hover {
-  background-color: var(--color-accent);
-  color: #111827;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.cta-band__button:focus-visible {
-  outline: 3px dashed rgba(255, 255, 255, 0.8);
-  outline-offset: 2px;
-}
-
-/* ─── Section 2: Bottom Bar ─── */
-.bottom-bar {
-  background-color: #000000;
-  padding: 1.25rem 1.5rem;
-}
-
-.bottom-bar__inner {
-  max-width: 72rem;
-  margin: 0 auto;
-}
-
-/* Legal nav row */
-.bottom-bar__legal {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 1.25rem;
-  margin-bottom: 0.75rem;
-}
-
-.bottom-bar__legal-link {
-  font-size: 0.8125rem;
-  color: #d1d5db;
-  transition: color 0.2s ease;
-  border-radius: 2px;
-}
-
-.bottom-bar__legal-link:hover {
-  color: #ffffff;
-}
-
-.bottom-bar__legal-link:focus-visible {
-  outline: 3px dashed rgba(255, 255, 255, 0.8);
-  outline-offset: 2px;
-}
-
-/* Copyright + Social row */
-.bottom-bar__meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.bottom-bar__copyright {
-  font-size: 0.875rem;
-  color: #d1d5db;
-}
-
-.bottom-bar__social {
-  display: flex;
-  gap: 1.25rem;
-}
-
-.bottom-bar__social-link {
-  display: inline-flex;
-  align-items: center;
-  color: #d1d5db;
-  transition: color 0.2s ease;
-  border-radius: 4px;
-}
-
-.bottom-bar__social-link:hover {
-  color: #ffffff;
-}
-
-.bottom-bar__social-link:focus-visible {
-  outline: 3px dashed rgba(255, 255, 255, 0.8);
-  outline-offset: 2px;
-}
-
-.bottom-bar__social-svg {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-.bottom-bar__social-fallback {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
-  font-size: 0.8125rem;
-  font-weight: 700;
-}
-
-@media (max-width: 768px) {
-  .cta-band__heading {
-    font-size: 1.5rem;
-  }
-
-  .bottom-bar__meta {
-    flex-direction: column;
-    text-align: center;
-  }
+.footer-prose :deep(p + p) {
+  margin-top: 0.75rem;
 }
 </style>

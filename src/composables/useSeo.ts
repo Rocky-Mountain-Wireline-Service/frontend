@@ -1,114 +1,118 @@
 import { useHead } from '@unhead/vue';
-import { computed } from 'vue';
+import { computed, unref, type MaybeRef } from 'vue';
 import { useRoute } from 'vue-router';
+import { useSiteShell } from '@/composables/useSiteShell';
+import { sanityImage } from '@/composables/useSanityImage';
+import type { Figure } from '@/types/content';
 
-const siteUrl = import.meta.env.VITE_SITE_URL || 'https://rmws.com';
-const siteName = 'Rocky Mountain Wireline Service';
-const defaultImage = `${siteUrl}/og-image.png`;
+const siteUrl = (import.meta.env.VITE_SITE_URL || 'https://rmws.com').replace(/\/$/, '');
+const SITE_NAME = 'Rocky Mountain Wireline Service';
 
-const pageMeta: Record<string, { title: string; description: string }> = {
-  '/': {
-    title: 'Home',
-    description: 'Rocky Mountain Wireline Service has set the standard in wireline services since 1988. Find a location near you and request a quote.',
-  },
-  '/about': {
-    title: 'About',
-    description: 'Providing quality service since 1988 and rivaled by no other competitor. Read the mission and vision behind Rocky Mountain Wireline Service.',
-  },
-  '/contact': {
-    title: 'Contact',
-    description: 'Get in touch with Rocky Mountain Wireline Service. Request a quote, reach the branch nearest you, or send us a message and we will follow up.',
-  },
-  '/privacy-policy': {
-    title: 'Privacy Policy',
-    description: 'Privacy Policy - Rocky Mountain Wireline Service',
-  },
-  '/terms-and-conditions': {
-    title: 'Terms & Conditions',
-    description: 'Terms & Conditions - Rocky Mountain Wireline Service',
-  },
-  '/accessibility': {
-    title: 'Accessibility Statement',
-    description: 'Accessibility Statement - Rocky Mountain Wireline Service',
-  },
-  '/cookie-policy': {
-    title: 'Cookie Policy',
-    description: 'Cookie Policy - Rocky Mountain Wireline Service',
-  },
-  '/services': {
-    title: 'Services',
-    description: 'Explore the wireline services RMWS provides, delivered by experienced crews through outstanding customer service and constant technological advancement.',
-  },
-  '/equipment': {
-    title: 'Equipment',
-    description: 'See the equipment behind Rocky Mountain Wireline Service, trusted by ISN, PEC, and SafeLand USA. Request a quote for your next job.',
-  },
-  '/safety': {
-    title: 'Safety',
-    description: 'Committed to safety both off and on the work site, RMWS delivers safe and efficient wireline services and products on every job.',
-  },
-  '/employment': {
-    title: 'Employment',
-    description: 'Work with the best. Apply to join the Rocky Mountain Wireline Service team and tell us which branch location and position you are after.',
-  },
-};
+export interface SeoInput {
+  title?: string;
+  description?: string;
+  image?: Figure | null;
+  noIndex?: boolean;
+  /** Used as the title when the document supplies none. */
+  fallbackHeading?: string;
+}
 
-const schemaJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  "name": "Rocky Mountain Wireline Service",
-  "url": "https://rmws.com",
-  "email": "theron.chepko@rmws.com",
-  "telephone": "9702701673",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "2144 Hwy 6 & 50",
-    "addressLocality": "Grand Junction",
-    "addressRegion": "CO",
-    "postalCode": "81505",
-    "addressCountry": "US"
-  }
-};
-
-export function useSeo() {
+/**
+ * Head tags for a page, driven by the CMS.
+ *
+ * The template hardcoded every title and description in a map keyed by path, so
+ * the client could not change what their own pages looked like in search
+ * results without a code change and a deploy. Those values now live on each
+ * document's Search & Social tab, with the site defaults as a fallback.
+ */
+export function useSeo(input: MaybeRef<SeoInput> = {}) {
   const route = useRoute();
+  const site = useSiteShell();
 
-  const meta = computed(() => pageMeta[route.path] || {
-    title: siteName,
-    description: 'Purpose-driven solutions from ' + siteName + '.',
+  const seo = computed(() => unref(input));
+
+  const title = computed(() => {
+    const t = seo.value.title || seo.value.fallbackHeading;
+    if (!t) return SITE_NAME;
+    return t.includes(SITE_NAME) ? t : `${t} - ${SITE_NAME}`;
   });
 
-  const fullTitle = computed(() => {
-    const t = meta.value.title;
-    return t.includes(siteName) ? t : `${t} | ${siteName}`;
-  });
+  const description = computed(
+    () => seo.value.description || site.defaultSeo?.description || site.tagline || ''
+  );
 
-  const canonicalUrl = computed(() => `${siteUrl}${route.path === '/' ? '' : route.path}`);
+  const canonical = computed(() => `${siteUrl}${route.path === '/' ? '/' : route.path}`);
+
+  const image = computed(() => {
+    const figure = seo.value.image ?? site.defaultSeo?.image;
+    if (figure?.asset) {
+      // Facebook and LinkedIn expect 1200x630 and crop anything else unpredictably.
+      return sanityImage(figure).width(1200).height(630).fit('crop').auto('format').url();
+    }
+    return `${siteUrl}/og-image.png`;
+  });
 
   useHead({
-    title: fullTitle,
-    link: [
-      { rel: 'canonical', href: canonicalUrl },
-    ],
+    title,
+    link: [{ rel: 'canonical', href: canonical }],
     meta: [
-      { name: 'description', content: computed(() => meta.value.description) },
+      { name: 'description', content: description },
+      ...(seo.value.noIndex ? [{ name: 'robots', content: 'noindex, nofollow' }] : []),
       { property: 'og:type', content: 'website' },
-      { property: 'og:site_name', content: siteName },
-      { property: 'og:title', content: fullTitle },
-      { property: 'og:description', content: computed(() => meta.value.description) },
-      { property: 'og:url', content: canonicalUrl },
-      { property: 'og:image', content: defaultImage },
+      { property: 'og:site_name', content: SITE_NAME },
+      { property: 'og:title', content: title },
+      { property: 'og:description', content: description },
+      { property: 'og:url', content: canonical },
+      { property: 'og:image', content: image },
       { property: 'og:locale', content: 'en_US' },
       { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:title', content: fullTitle },
-      { name: 'twitter:description', content: computed(() => meta.value.description) },
-      { name: 'twitter:image', content: defaultImage },
+      { name: 'twitter:title', content: title },
+      { name: 'twitter:description', content: description },
+      { name: 'twitter:image', content: image },
     ],
-    script: [
+  });
+}
+
+/**
+ * Sitewide LocalBusiness data, emitted once from the layout.
+ *
+ * Branch locations come from the CMS rather than being hardcoded: the previous
+ * implementation declared a single address, which told search engines this was
+ * a one-office business when it operates several.
+ */
+export function useOrganizationSchema() {
+  const site = useSiteShell();
+
+  useHead({
+    script: computed(() => [
       {
         type: 'application/ld+json',
-        innerHTML: JSON.stringify(schemaJsonLd),
+        innerHTML: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Organization',
+          name: site.name,
+          url: siteUrl,
+          ...(site.logo ? { logo: site.logo } : {}),
+          ...(site.tagline ? { description: site.tagline } : {}),
+          ...(site.locations.length
+            ? {
+                location: site.locations.map((loc) => ({
+                  '@type': 'LocalBusiness',
+                  name: `${site.name} — ${loc.city}`,
+                  ...(loc.phone ? { telephone: loc.phone } : {}),
+                  address: {
+                    '@type': 'PostalAddress',
+                    ...(loc.streetAddress ? { streetAddress: loc.streetAddress } : {}),
+                    addressLocality: loc.city,
+                    addressRegion: loc.state,
+                    ...(loc.postalCode ? { postalCode: loc.postalCode } : {}),
+                    addressCountry: 'US',
+                  },
+                })),
+              }
+            : {}),
+        }),
       },
-    ],
+    ]),
   });
 }

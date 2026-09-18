@@ -1,35 +1,29 @@
-import type { Component } from 'vue'
-import HeroSection from '@/components/sections/HeroSection.vue'
-import FeatureGrid from '@/components/sections/FeatureGrid.vue'
-import StatsSection from '@/components/sections/StatsSection.vue'
-import ProcessSteps from '@/components/sections/ProcessSteps.vue'
-import TestimonialsSection from '@/components/sections/TestimonialsSection.vue'
-import PricingSection from '@/components/sections/PricingSection.vue'
-import PricingCtaSection from '@/components/sections/PricingCtaSection.vue'
-import FaqSection from '@/components/sections/FaqSection.vue'
-import SplitSection from '@/components/sections/SplitSection.vue'
-import ContactSection from '@/components/sections/ContactSection.vue'
-import TextContent from '@/components/sections/TextContent.vue'
-import PortfolioSection from '@/components/sections/PortfolioSection.vue'
-import TeamProjectsSection from '@/components/sections/TeamProjectsSection.vue'
+import type { Component } from 'vue';
+import HeroSection from '@/components/sections/HeroSection.vue';
+import BodyContent from '@/components/sections/BodyContent.vue';
+import LinkCardGrid from '@/components/sections/LinkCardGrid.vue';
+import ServicesGrid from '@/components/sections/ServicesGrid.vue';
+import LocationsSection from '@/components/sections/LocationsSection.vue';
+import StatementCards from '@/components/sections/StatementCards.vue';
+import LogoStrip from '@/components/sections/LogoStrip.vue';
+import ContactCards from '@/components/sections/ContactCards.vue';
+import StaffDirectory from '@/components/sections/StaffDirectory.vue';
+import FormSection from '@/components/sections/FormSection.vue';
 
-/** Maps section _type (from Sanity) to Vue components */
+/**
+ * Maps a section's `_type` in Sanity to the component that renders it.
+ * A type with no entry here is skipped rather than throwing, so adding a
+ * section type in the Studio ahead of its component does not break the page.
+ */
 export const sectionMap: Record<string, Component> = {
   heroSection: HeroSection,
-  featureGrid: FeatureGrid,
-  statsSection: StatsSection,
-  processSteps: ProcessSteps,
-  testimonialsSection: TestimonialsSection,
-  pricingSection: PricingSection,
-  pricingCtaSection: PricingCtaSection,
-  faqSection: FaqSection,
-  splitSection: SplitSection,
-  contactSection: ContactSection,
-  textContent: TextContent,
-  portfolioSection: PortfolioSection,
-  teamProjectsSection: TeamProjectsSection,
-}
-
-/** GROQ query — just fetch the whole page document with sections */
-export const pageQuery = (slug: string) =>
-  `*[_type == "page" && slug.current == "${slug}"][0]{ title, "slug": slug.current, sections }`
+  bodyContent: BodyContent,
+  linkCardGrid: LinkCardGrid,
+  servicesGrid: ServicesGrid,
+  locationsSection: LocationsSection,
+  statementCards: StatementCards,
+  logoStrip: LogoStrip,
+  contactCards: ContactCards,
+  staffDirectory: StaffDirectory,
+  formSection: FormSection,
+};

@@ -1,99 +1,48 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import type { RouteRecordRaw } from 'vue-router';
 
-const Home = () => import('@/pages/Home.vue');
-const About = () => import('@/pages/About.vue');
-const Contact = () => import('@/pages/Contact.vue');
-const PrivacyPolicy = () => import('@/components/layout/LegalPage.vue');
-const TermsAndConditions = () => import('@/components/layout/LegalPage.vue');
-const Accessibility = () => import('@/components/layout/LegalPage.vue');
-const CookiePolicy = () => import('@/components/layout/LegalPage.vue');
-const Services = () => import('@/pages/Services.vue');
-const Equipment = () => import('@/pages/Equipment.vue');
-const Safety = () => import('@/pages/Safety.vue');
-const Employment = () => import('@/pages/Employment.vue');
-const ProjectDetail = () => import('@/pages/ProjectDetail.vue');
-const TeamProjectDetail = () => import('@/pages/TeamProjectDetail.vue');
+const CmsPage = () => import('@/pages/CmsPage.vue');
+const ServiceDetail = () => import('@/pages/ServiceDetail.vue');
+const LegalPage = () => import('@/pages/LegalPage.vue');
 const NotFound = () => import('@/pages/NotFound.vue');
 
-const routes = [
+/**
+ * The route table only. vite-ssg constructs the router itself — once with a
+ * memory history for the prerender, once with a web history in the browser — so
+ * calling `createRouter` here would touch `window` during the build.
+ */
+
+/**
+ * Paths that resolve to a `page` document in Sanity. The slug stored in the CMS
+ * is the path itself, which `meta.slug` carries through to the query.
+ */
+const CMS_PAGES = ['/', '/about', '/services', '/equipment', '/safety', '/employment', '/contact'];
+
+/** Paths that resolve to a `legalPage` document. */
+const LEGAL_PAGES = ['/privacy-policy', '/terms-and-conditions'];
+
+export const routes: RouteRecordRaw[] = [
+  ...CMS_PAGES.map((path) => ({
+    path,
+    name: `page:${path}`,
+    component: CmsPage,
+    meta: { slug: path },
+  })),
+
   {
-    path: '/',
-    name: 'Home',
-    component: Home,
+    path: '/services/:slug',
+    name: 'service',
+    component: ServiceDetail,
   },
-  {
-    path: '/about',
-    name: 'About',
-    component: About,
-  },
-  {
-    path: '/contact',
-    name: 'Contact',
-    component: Contact,
-  },
-  {
-    path: '/privacy-policy',
-    name: 'Privacy Policy',
-    component: PrivacyPolicy,
-  },
-  {
-    path: '/terms-and-conditions',
-    name: 'Terms & Conditions',
-    component: TermsAndConditions,
-  },
-  {
-    path: '/accessibility',
-    name: 'Accessibility Statement',
-    component: Accessibility,
-  },
-  {
-    path: '/cookie-policy',
-    name: 'Cookie Policy',
-    component: CookiePolicy,
-  },
-  {
-    path: '/services',
-    name: 'Services',
-    component: Services,
-  },
-  {
-    path: '/equipment',
-    name: 'Equipment',
-    component: Equipment,
-  },
-  {
-    path: '/safety',
-    name: 'Safety',
-    component: Safety,
-  },
-  {
-    path: '/employment',
-    name: 'Employment',
-    component: Employment,
-  },
-  {
-    path: '/portfolio/:slug',
-    name: 'ProjectDetail',
-    component: ProjectDetail,
-  },
-  {
-    path: '/team-projects/:slug',
-    name: 'TeamProjectDetail',
-    component: TeamProjectDetail,
-  },
+
+  ...LEGAL_PAGES.map((path) => ({
+    path,
+    name: `legal:${path}`,
+    component: LegalPage,
+  })),
+
   {
     path: '/:pathMatch(.*)*',
-    name: 'NotFound',
+    name: 'not-found',
     component: NotFound,
   },
 ];
-
-const router = createRouter({
-  history: createWebHistory(),
-  routes,
-  scrollBehavior(_to, _from, savedPosition) {
-    return savedPosition || { top: 0 };
-  },
-});
-
-export default router;

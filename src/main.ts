@@ -1,26 +1,34 @@
-import { createApp } from 'vue';
+import { ViteSSG } from 'vite-ssg';
 import { createPinia } from 'pinia';
-import { createHead } from '@unhead/vue';
 import App from './App.vue';
-import router from './router';
+import { routes } from './router';
 import './assets/styles/main.css';
 
-const app = createApp(App);
-const pinia = createPinia();
-const head = createHead();
+/**
+ * vite-ssg prerenders every route to real HTML at build time and hydrates it in
+ * the browser. The template mounted a plain SPA, which meant search engines
+ * received an empty shell for a site whose entire purpose is being found.
+ */
+export const createApp = ViteSSG(
+  App,
+  {
+    routes,
+    scrollBehavior(to, _from, savedPosition) {
+      if (savedPosition) return savedPosition;
+      if (to.hash) return { el: to.hash, behavior: 'smooth' };
+      return { top: 0 };
+    },
+  },
+  ({ app, initialState, isClient }) => {
+    const pinia = createPinia();
+    app.use(pinia);
 
-app.use(pinia);
-app.use(router);
-app.use(head);
-
-app.mount('#app');
-
-// Allow Space key to activate links (a tags) for keyboard accessibility.
-// Native <a> elements only respond to Enter; this adds Space parity with <button>.
-document.addEventListener('keydown', (e) => {
-  if (e.key === ' ' && e.target instanceof HTMLAnchorElement) {
-    e.preventDefault();
-    e.target.click();
+    // Content fetched during the prerender is serialised into the HTML and
+    // restored here, so the browser reuses it instead of refetching.
+    if (isClient) {
+      pinia.state.value = (initialState.pinia as typeof pinia.state.value) || {};
+    } else {
+      initialState.pinia = pinia.state.value;
+    }
   }
-});
-
+);

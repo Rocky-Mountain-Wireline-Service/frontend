@@ -1,53 +1,69 @@
-<script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useSiteStore } from '@/stores/useSiteStore';
+<script setup lang="ts">
+import { PortableText } from '@portabletext/vue';
+import SanityImage from '@/components/ui/SanityImage.vue';
 import SmartLink from '@/components/ui/SmartLink.vue';
-import SiteAmbience from '@/components/layout/SiteAmbience.vue';
-import { sanityImage } from '@/composables/useSanityImage';
+import type { Figure, Link, PortableText as PT } from '@/types/content';
 
-const props = defineProps({ section: { type: Object, default: null } });
-const site = useSiteStore();
-const heroRef = ref(null);
-
-function onHeroMouseMove(e) {
-  const rect = heroRef.value.getBoundingClientRect();
-  const x = ((e.clientX - rect.left) / rect.width) * 100;
-  const y = ((e.clientY - rect.top) / rect.height) * 100;
-  heroRef.value.style.setProperty('--cursor-x', `${x}%`);
-  heroRef.value.style.setProperty('--cursor-y', `${y}%`);
-}
-
-const heroStyle = computed(() => {
-  const img = props.section?.image;
-  if (!img) return {};
-  const url = sanityImage(img).width(1920).fit('crop').auto('format').url();
-  return { '--hero-image': `url(${url})` };
-});
-
-onMounted(() => { heroRef.value?.addEventListener('mousemove', onHeroMouseMove); });
-onUnmounted(() => { heroRef.value?.removeEventListener('mousemove', onHeroMouseMove); });
+defineProps<{
+  section: {
+    heading?: string;
+    intro?: PT;
+    image?: Figure;
+    cta?: Link;
+  };
+}>();
 </script>
 
 <template>
-  <section ref="heroRef" class="hero relative flex items-center justify-center min-h-[480px] px-6 py-24 overflow-hidden" :style="heroStyle" :aria-label="section?.imageAlt || undefined">
-    <SiteAmbience variant="hero" />
-    <div class="relative z-10 text-center text-white max-w-3xl mx-auto">
-      <h1 v-if="section?.title || site.name" class="text-5xl font-extrabold leading-tight mb-4">{{ section?.title || site.name }}</h1>
-      <p v-if="section?.subtitle || site.tagline" class="text-xl opacity-80 mb-8">{{ section?.subtitle || site.tagline }}</p>
-      <SmartLink v-if="section?.cta?.label && section?.cta?.url" :to="section.cta.url" class="focus-ring-light inline-block border-2 border-white text-white font-semibold px-8 py-3 rounded-lg hover:bg-white hover:text-[var(--color-primary)] transition-colors">{{ section.cta.label }}</SmartLink>
+  <section class="relative isolate flex min-h-[60vh] items-center overflow-hidden md:min-h-[70vh]">
+    <!--
+      The image is a real <img> rather than a CSS background so it participates
+      in srcset and can be the LCP element the browser prioritises. The old site
+      used a fixed-position background that shipped one 1920px file to phones.
+    -->
+    <SanityImage
+      v-if="section.image?.asset"
+      :figure="section.image"
+      :width="1920"
+      :height="1080"
+      sizes="100vw"
+      eager
+      class-name="absolute inset-0 -z-10 h-full w-full object-cover"
+    />
+    <div
+      class="absolute inset-0 -z-10"
+      :class="
+        section.image?.asset
+          ? 'bg-gradient-to-br from-black/75 via-black/55 to-[color-mix(in_srgb,var(--color-primary)_70%,transparent)]'
+          : 'bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-hover)]'
+      "
+    />
+
+    <div class="mx-auto w-full max-w-5xl px-6 py-24 text-white">
+      <h1 class="max-w-3xl text-balance text-4xl font-bold leading-tight drop-shadow-sm sm:text-5xl lg:text-6xl">
+        {{ section.heading }}
+      </h1>
+
+      <div
+        v-if="section.intro?.length"
+        class="hero-intro mt-6 max-w-2xl text-lg leading-relaxed text-white/90 sm:text-xl"
+      >
+        <PortableText :value="section.intro" />
+      </div>
+
+      <SmartLink
+        v-if="section.cta?.href && section.cta?.label"
+        :to="section.cta.href"
+        class="focus-ring-light mt-10 inline-flex items-center rounded-md bg-[var(--color-secondary)] px-8 py-3.5 font-semibold text-[color:#1a1a1a] transition-colors hover:bg-white"
+      >
+        {{ section.cta.label }}
+      </SmartLink>
     </div>
   </section>
 </template>
 
 <style scoped>
-.hero {
-  --cursor-x: 50%;
-  --cursor-y: 40%;
-  background: radial-gradient(600px circle at var(--cursor-x) var(--cursor-y), rgba(255,255,255,0.15), transparent 60%), linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
-  background-size: cover; background-position: center; will-change: background; transition: background 0.1s ease;
-}
-.hero[style*="--hero-image"] {
-  background: radial-gradient(600px circle at var(--cursor-x) var(--cursor-y), rgba(255,255,255,0.12), transparent 60%), linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 75%, transparent) 0%, color-mix(in srgb, var(--color-secondary) 75%, transparent) 100%), var(--hero-image);
-  background-size: cover; background-position: center;
+.hero-intro :deep(p + p) {
+  margin-top: 1rem;
 }
 </style>
