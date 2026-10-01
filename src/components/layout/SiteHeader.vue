@@ -47,11 +47,11 @@ watch(() => route.fullPath, () => { mobileOpen.value = false; });
 
       <div class="flex items-center gap-3">
         <RouterLink
-          to="/contact"
+          :to="site.headerCta.href"
           class="focus-ring hidden rounded-md bg-[var(--color-primary)] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-primary-hover)] sm:inline-flex"
           @click="onQuoteClick('header')"
         >
-          Request a Quote
+          {{ site.headerCta.label }}
         </RouterLink>
 
         <button
@@ -96,11 +96,11 @@ watch(() => route.fullPath, () => { mobileOpen.value = false; });
         {{ item.label }}
       </SmartLink>
       <RouterLink
-        to="/contact"
+        :to="site.headerCta.href"
         class="focus-ring mt-3 block rounded-md bg-[var(--color-primary)] px-5 py-2.5 text-center font-semibold text-white sm:hidden"
         @click="onQuoteClick('mobile_menu')"
       >
-        Request a Quote
+        {{ site.headerCta.label }}
       </RouterLink>
     </nav>
   </header>

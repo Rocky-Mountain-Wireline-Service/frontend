@@ -15,7 +15,10 @@ export const createApp = ViteSSG(
     routes,
     scrollBehavior(to, _from, savedPosition) {
       if (savedPosition) return savedPosition;
-      if (to.hash) return { el: to.hash, behavior: 'smooth' };
+      // Anchors are handled by useHashScroll, which waits for the target to be
+      // rendered from CMS data. Returning a position here would scroll to the
+      // top before that target exists and fight the composable.
+      if (to.hash) return false;
       return { top: 0 };
     },
   },

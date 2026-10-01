@@ -6,6 +6,7 @@ import { RouterLink } from 'vue-router';
 import { ArrowLeft } from 'lucide-vue-next';
 import { useSanityQuery } from '@/composables/useSanityQuery';
 import { useSeo } from '@/composables/useSeo';
+import { useHashScroll } from '@/composables/useHashScroll';
 import { track } from '@/lib/analytics';
 import { SERVICE_BY_SLUG } from '@/lib/queries';
 import SanityImage from '@/components/ui/SanityImage.vue';
@@ -47,6 +48,8 @@ useSeo(
     ready: Boolean(service.value),
   }))
 );
+
+useHashScroll(computed(() => Boolean(service.value)));
 </script>
 
 <template>
@@ -93,11 +96,11 @@ useSeo(
       <div class="mt-14 rounded-lg bg-[var(--color-bg-secondary)] p-8 text-center ring-1 ring-[var(--color-border)]">
         <p class="text-xl font-semibold">Need this service on your next job?</p>
         <RouterLink
-          to="/contact"
+          to="/contact#contact-form"
           class="focus-ring mt-5 inline-flex rounded-md bg-[var(--color-primary)] px-8 py-3 font-semibold text-white transition-colors hover:bg-[var(--color-primary-hover)]"
           @click="track('quote_cta_click', { placement: 'service_detail', service: service?.title })"
         >
-          Request a quote
+          Contact Sales
         </RouterLink>
       </div>
     </div>

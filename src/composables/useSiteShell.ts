@@ -40,6 +40,15 @@ export function useSiteShell() {
     name: computed(() => settings.value?.siteName || FALLBACK_NAME),
     tagline: computed(() => settings.value?.tagline ?? ''),
     copyrightText: computed(() => settings.value?.copyrightText ?? ''),
+
+    /**
+     * The header button. Defaults point at the contact form's anchor so the
+     * visitor lands on the form itself rather than the top of the page.
+     */
+    headerCta: computed<Link>(() => ({
+      label: settings.value?.headerCta?.label || 'Contact Sales',
+      href: settings.value?.headerCta?.href || '/contact#contact-form',
+    })),
     developerCredit: computed(() => settings.value?.developerCredit ?? ''),
     developerUrl: computed(() => settings.value?.developerUrl ?? ''),
 

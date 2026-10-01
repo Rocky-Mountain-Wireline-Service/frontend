@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import { PortableText } from '@portabletext/vue';
 import { useSanityQuery } from '@/composables/useSanityQuery';
 import { useSeo } from '@/composables/useSeo';
+import { useHashScroll } from '@/composables/useHashScroll';
 import { LEGAL_BY_SLUG } from '@/lib/queries';
 import NotFound from '@/pages/NotFound.vue';
 import type { LegalPage } from '@/types/content';
@@ -32,6 +33,8 @@ useSeo(
     ready: Boolean(page.value),
   }))
 );
+
+useHashScroll(computed(() => Boolean(page.value)));
 </script>
 
 <template>

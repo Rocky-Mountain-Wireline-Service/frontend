@@ -13,15 +13,87 @@ withDefaults(
       cta?: Link;
       secondaryCta?: Link;
     };
+    /**
+     * panel   — text in a solid brand block beside the photograph
+     * overlay — text over the photograph behind a scrim
+     */
+    variant?: 'panel' | 'overlay';
     /** Interior pages use a shorter band than the homepage. */
     compact?: boolean;
   }>(),
-  { compact: false }
+  { variant: 'panel', compact: false }
 );
 </script>
 
 <template>
+  <!--
+    Panel: the copy sits on solid brand red beside the photograph rather than on
+    top of it.
+
+    Text over a photograph is always a compromise — the live site sets black
+    type straight onto the image, which disappears against the truck, and the
+    scrim that fixes legibility buries the vehicle the photograph exists to
+    show. Moving the text beside the image removes the conflict: the type gets a
+    controlled ground at full contrast, and the photograph is never darkened.
+    The red block also repeats the locations band, so the page opens on brand
+    rather than on a wash of grey.
+  -->
   <section
+    v-if="variant === 'panel' && section.image?.asset"
+    class="relative isolate grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
+  >
+    <div
+      class="order-2 flex items-center bg-[var(--color-primary)] px-6 py-14 text-white lg:order-1 lg:px-12 lg:py-20 xl:px-16"
+    >
+      <div class="mx-auto w-full max-w-lg lg:mx-0 lg:ml-auto">
+        <h1
+          class="text-balance font-[var(--font-heading)] text-3xl font-bold uppercase leading-[1.1] sm:text-4xl lg:text-[2.85rem]"
+        >
+          {{ section.heading }}
+        </h1>
+
+        <div v-if="section.intro?.length" class="hero-intro mt-5 leading-relaxed text-white">
+          <PortableText :value="section.intro" />
+        </div>
+
+        <div v-if="section.cta?.href || section.secondaryCta?.href" class="mt-8 flex flex-wrap gap-3">
+          <BaseButton
+            v-if="section.cta?.href && section.cta?.label"
+            :to="section.cta.href"
+            variant="gold"
+            size="lg"
+            class="focus-ring-light"
+          >
+            {{ section.cta.label }}
+          </BaseButton>
+          <BaseButton
+            v-if="section.secondaryCta?.href && section.secondaryCta?.label"
+            :to="section.secondaryCta.href"
+            variant="light"
+            size="lg"
+            class="focus-ring-light"
+          >
+            {{ section.secondaryCta.label }}
+          </BaseButton>
+        </div>
+      </div>
+    </div>
+
+    <div class="order-1 lg:order-2">
+      <SanityImage
+        :figure="section.image"
+        :width="1400"
+        :height="1000"
+        sizes="(min-width: 1024px) 55vw, 100vw"
+        eager
+        class-name="h-56 w-full object-cover sm:h-80 lg:h-full lg:min-h-[34rem]"
+      />
+    </div>
+  </section>
+
+  <!-- Overlay: a single band with the copy over a left-weighted scrim. -->
+  <section
+    v-else
     class="relative isolate flex items-center overflow-hidden"
     :class="compact ? 'min-h-[42vh] md:min-h-[48vh]' : 'min-h-[68vh] md:min-h-[76vh]'"
   >
@@ -34,15 +106,6 @@ withDefaults(
       eager
       class-name="absolute inset-0 -z-20 h-full w-full object-cover"
     />
-
-    <!--
-      A left-weighted scrim rather than a flat wash. The live site sets black
-      text straight onto the photograph, which reads on the pale cliff face and
-      disappears against the truck; a full-strength overlay fixes legibility but
-      buries the vehicle, which is the photograph's whole subject. Fading the
-      darkness out to the right keeps the text on a solid ground while the truck
-      stays visible.
-    -->
     <div
       class="absolute inset-0 -z-10"
       :class="
@@ -97,7 +160,7 @@ withDefaults(
 */
 .hero-intro :deep(p:first-child) {
   font-family: var(--font-heading);
-  font-size: 1.375rem;
+  font-size: 1.3125rem;
   font-weight: 700;
   color: var(--color-secondary);
   letter-spacing: 0.01em;

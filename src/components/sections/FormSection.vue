@@ -42,7 +42,11 @@ const INPUT_CLASS =
 </script>
 
 <template>
-  <section v-if="isActive" class="px-6 py-12 md:py-20">
+  <!--
+    `scroll-mt` keeps the heading clear of the sticky header when a link lands
+    on this anchor; without it the heading sits underneath the bar.
+  -->
+  <section v-if="isActive" id="contact-form" class="scroll-mt-24 px-6 py-12 md:py-20">
     <div class="mx-auto max-w-2xl">
       <SectionHeading v-if="section.heading">{{ section.heading }}</SectionHeading>
       <div v-if="section.intro?.length" class="prose-body mt-4">

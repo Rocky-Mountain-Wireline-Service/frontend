@@ -84,6 +84,7 @@ export const SITE_SHELL = `{
     siteName,
     tagline,
     copyrightText,
+    headerCta,
     developerCredit,
     developerUrl,
     logo ${FIGURE},

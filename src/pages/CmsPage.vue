@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useSanityQuery } from '@/composables/useSanityQuery';
 import { useSeo } from '@/composables/useSeo';
+import { useHashScroll } from '@/composables/useHashScroll';
 import PageSections from '@/components/layout/PageSections.vue';
 import type { Figure, Page } from '@/types/content';
 
@@ -53,6 +54,8 @@ useSeo(
     fallbackImage: firstHeroImage.value,
   }))
 );
+
+useHashScroll(computed(() => Boolean(page.value)));
 </script>
 
 <template>

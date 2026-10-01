@@ -100,6 +100,7 @@ export interface SiteSettings {
   siteName?: string;
   tagline?: string;
   copyrightText?: string;
+  headerCta?: Link;
   developerCredit?: string;
   developerUrl?: string;
   logo?: Figure;
