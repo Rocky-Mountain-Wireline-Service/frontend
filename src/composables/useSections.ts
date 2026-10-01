@@ -9,6 +9,7 @@ import LogoStrip from '@/components/sections/LogoStrip.vue';
 import ContactCards from '@/components/sections/ContactCards.vue';
 import StaffDirectory from '@/components/sections/StaffDirectory.vue';
 import FormSection from '@/components/sections/FormSection.vue';
+import MapEmbed from '@/components/sections/MapEmbed.vue';
 
 /**
  * Maps a section's `_type` in Sanity to the component that renders it.
@@ -26,4 +27,5 @@ export const sectionMap: Record<string, Component> = {
   contactCards: ContactCards,
   staffDirectory: StaffDirectory,
   formSection: FormSection,
+  mapEmbed: MapEmbed,
 };

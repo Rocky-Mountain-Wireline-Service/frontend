@@ -11,11 +11,16 @@ defineProps<{
 <template>
   <!--
     An inset band rather than a full-bleed one. On the live site this block sits
-    within the page's gutters, which stops the strong red from cutting the page
-    in half and keeps it reading as a card of information.
+    within the page's gutters, which stops it cutting the page in half and keeps
+    it reading as a card of information.
+
+    Navy rather than red: the hero is now a solid red panel, and stacking a
+    second red block directly beneath it read as one undifferentiated slab,
+    especially on a phone where they fill the screen in sequence. The navy is
+    already in the brand kit — the footer's utility bar uses it.
   -->
   <section data-analytics-section="locations" class="px-6 pb-6 pt-10 md:pb-8 md:pt-12">
-    <div class="mx-auto max-w-6xl rounded-md bg-[var(--color-primary)] px-6 py-10 text-white md:px-12">
+    <div class="mx-auto max-w-6xl rounded-md bg-[var(--color-band)] px-6 py-10 text-white md:px-12">
       <SectionHeading v-if="section.heading" align="center" invert class="mb-8">
         {{ section.heading }}
       </SectionHeading>

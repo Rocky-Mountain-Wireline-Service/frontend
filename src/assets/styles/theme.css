@@ -58,6 +58,12 @@
   --color-danger: light-dark(#b91c1c, #f87171);
   --color-danger-light: light-dark(#fef2f2, #3f1212);
 
+  /* ── Accent band ────────────────────────────────────────────────────────
+     A second dark ground for full-width bands, so a page does not have to put
+     two red blocks back to back. The navy is from the existing brand kit — the
+     live site already uses it for the footer's utility bar. */
+  --color-band: light-dark(#004075, #002d52);
+
   /* ── Headings ───────────────────────────────────────────────────────────
      The live site sets headings in near-black rather than the body's blue-grey,
      which is what gives its section titles their weight. Kept as its own token

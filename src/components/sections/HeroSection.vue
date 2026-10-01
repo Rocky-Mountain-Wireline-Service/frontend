@@ -43,7 +43,7 @@ withDefaults(
     class="relative isolate grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
   >
     <div
-      class="order-2 flex items-center bg-[var(--color-primary)] px-6 py-14 text-white lg:order-1 lg:px-12 lg:py-20 xl:px-16"
+      class="order-2 flex items-center bg-[var(--color-primary)] px-6 py-10 text-white sm:py-12 lg:order-1 lg:px-12 lg:py-20 xl:px-16"
     >
       <div class="mx-auto w-full max-w-lg lg:mx-0 lg:ml-auto">
         <h1
@@ -56,13 +56,16 @@ withDefaults(
           <PortableText :value="section.intro" />
         </div>
 
-        <div v-if="section.cta?.href || section.secondaryCta?.href" class="mt-8 flex flex-wrap gap-3">
+        <div
+          v-if="section.cta?.href || section.secondaryCta?.href"
+          class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap"
+        >
           <BaseButton
             v-if="section.cta?.href && section.cta?.label"
             :to="section.cta.href"
             variant="gold"
             size="lg"
-            class="focus-ring-light"
+            class="focus-ring-light w-full sm:w-auto"
           >
             {{ section.cta.label }}
           </BaseButton>
@@ -71,7 +74,7 @@ withDefaults(
             :to="section.secondaryCta.href"
             variant="light"
             size="lg"
-            class="focus-ring-light"
+            class="focus-ring-light w-full sm:w-auto"
           >
             {{ section.secondaryCta.label }}
           </BaseButton>
@@ -86,7 +89,7 @@ withDefaults(
         :height="1000"
         sizes="(min-width: 1024px) 55vw, 100vw"
         eager
-        class-name="h-56 w-full object-cover sm:h-80 lg:h-full lg:min-h-[34rem]"
+        class-name="aspect-[4/3] max-h-80 w-full object-cover sm:aspect-[16/9] sm:max-h-96 lg:aspect-auto lg:h-full lg:max-h-none lg:min-h-[34rem]"
       />
     </div>
   </section>
