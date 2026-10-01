@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { PortableText } from '@portabletext/vue';
 import SanityImage from '@/components/ui/SanityImage.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import type { Figure, Link, PortableText as PT } from '@/types/content';
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     section: {
       heading?: string;
@@ -14,15 +15,33 @@ withDefaults(
       secondaryCta?: Link;
     };
     /**
+     * auto    — panel when the hero has copy to hold, otherwise overlay
      * panel   — text in a solid brand block beside the photograph
      * overlay — text over the photograph behind a scrim
      */
-    variant?: 'panel' | 'overlay';
-    /** Interior pages use a shorter band than the homepage. */
-    compact?: boolean;
+    variant?: 'auto' | 'panel' | 'overlay';
   }>(),
-  { variant: 'panel', compact: false }
+  { variant: 'auto' }
 );
+
+/**
+ * The panel exists to hold content. Interior pages carry a heading and nothing
+ * else, so a panel there is an empty red rectangle sitting between the page's
+ * hero photograph and the page's first content image — two photographs with a
+ * near-blank block wedged between them, which on a phone is most of the first
+ * screen. Those pages get the overlay instead, which is a single band.
+ */
+const hasSubstance = computed(() =>
+  Boolean(props.section.intro?.length || props.section.cta?.href || props.section.secondaryCta?.href)
+);
+
+const resolved = computed<'panel' | 'overlay'>(() => {
+  if (props.variant !== 'auto') return props.variant;
+  return hasSubstance.value && props.section.image?.asset ? 'panel' : 'overlay';
+});
+
+/** A title-only hero does not need to fill the viewport to do its job. */
+const compact = computed(() => !hasSubstance.value);
 </script>
 
 <template>
@@ -39,7 +58,7 @@ withDefaults(
     rather than on a wash of grey.
   -->
   <section
-    v-if="variant === 'panel' && section.image?.asset"
+    v-if="resolved === 'panel'"
     class="relative isolate grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
   >
     <div
