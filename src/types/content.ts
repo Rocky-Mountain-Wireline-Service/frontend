@@ -82,6 +82,7 @@ export interface FormField {
   label: string;
   type: string;
   required?: boolean;
+  width?: 'full' | 'half' | 'third';
   options?: string[];
 }
 
