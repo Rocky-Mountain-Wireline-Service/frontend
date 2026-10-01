@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { MapPin, ExternalLink } from 'lucide-vue-next';
 import SectionHeading from '@/components/ui/SectionHeading.vue';
 
 const props = defineProps<{
@@ -8,7 +7,6 @@ const props = defineProps<{
     heading?: string;
     embedUrl?: string;
     label?: string;
-    address?: string;
     height?: 'short' | 'medium' | 'tall';
   };
 }>();
@@ -39,62 +37,36 @@ const safeUrl = computed(() => {
 });
 
 const HEIGHTS = {
-  short: 'h-64 sm:h-72',
-  medium: 'h-80 sm:h-96',
-  tall: 'h-96 sm:h-[32rem]',
+  short: 'h-72 sm:h-80',
+  medium: 'h-80 sm:h-[26rem]',
+  tall: 'h-96 sm:h-[34rem]',
 } as const;
 
 const heightClass = computed(() => HEIGHTS[props.section.height ?? 'medium']);
-
-/** Opens the native maps app on a phone, which is where directions actually happen. */
-const directionsUrl = computed(() =>
-  props.section.address
-    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(props.section.address)}`
-    : null
-);
 </script>
 
 <template>
-  <section v-if="safeUrl" class="px-6 py-12 md:py-16">
-    <div class="mx-auto max-w-6xl">
-      <SectionHeading v-if="section.heading" class="mb-8">{{ section.heading }}</SectionHeading>
-
-      <div class="overflow-hidden rounded-md ring-1 ring-[var(--color-border)]">
-        <!--
-          `loading="lazy"` keeps a third-party frame off the critical path, and
-          the restrictive referrerpolicy stops the full page URL being handed to
-          the map provider on every view.
-        -->
-        <iframe
-          :src="safeUrl"
-          :title="section.label || 'Map'"
-          :class="['w-full border-0', heightClass]"
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"
-          allowfullscreen
-        />
-      </div>
-
-      <p
-        v-if="section.address"
-        class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[var(--color-text-secondary)]"
-      >
-        <span class="inline-flex items-start gap-2">
-          <MapPin :size="16" class="mt-0.5 shrink-0 text-[var(--color-primary-ink)]" aria-hidden="true" />
-          <span class="whitespace-pre-line">{{ section.address }}</span>
-        </span>
-        <a
-          v-if="directionsUrl"
-          :href="directionsUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="focus-ring inline-flex items-center gap-1.5 font-semibold text-[var(--color-primary-ink)] underline-offset-4 hover:underline"
-        >
-          Get directions
-          <ExternalLink :size="14" aria-hidden="true" />
-          <span class="sr-only">(opens in a new tab)</span>
-        </a>
-      </p>
+  <!--
+    No bottom padding: the map runs full-bleed into the footer, so the page ends
+    on the map rather than on a strip of background between the two.
+  -->
+  <section v-if="safeUrl" class="pt-12 md:pt-16">
+    <div v-if="section.heading" class="mx-auto mb-8 max-w-6xl px-6">
+      <SectionHeading>{{ section.heading }}</SectionHeading>
     </div>
+
+    <!--
+      `block` matters here. An iframe is inline by default, so it sits on a text
+      baseline and leaves a few pixels of descender gap underneath — which is
+      exactly the seam this layout is trying to avoid.
+    -->
+    <iframe
+      :src="safeUrl"
+      :title="section.label || 'Map'"
+      :class="['block w-full border-0', heightClass]"
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+      allowfullscreen
+    />
   </section>
 </template>

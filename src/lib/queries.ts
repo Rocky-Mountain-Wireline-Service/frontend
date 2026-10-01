@@ -40,7 +40,7 @@ const SECTIONS = `
       cards[]{ title, value, href, icon ${FIGURE} }
     },
     _type == "staffDirectory" => { heading, people },
-    _type == "mapEmbed" => { heading, embedUrl, label, address, height },
+    _type == "mapEmbed" => { heading, embedUrl, label, height },
     _type == "formSection" => {
       heading,
       intro,
