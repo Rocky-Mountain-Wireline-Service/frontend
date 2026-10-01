@@ -44,6 +44,7 @@ const SECTIONS = `
     _type == "formSection" => {
       heading,
       intro,
+      tone,
       "form": form->{ _id, title, "slug": slug.current, active, description, fields, successMessage, spamProtection }
     }
   }

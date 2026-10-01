@@ -111,6 +111,15 @@ export function useForm(form: () => DynamicForm | null | undefined) {
     }
 
     if (!validate()) {
+      // A form-level message as well as the per-field ones. Without it nothing
+      // is announced on submit: the field errors appear in place, but focus
+      // stays on the button and a screen reader user is given no indication
+      // that anything happened, let alone where to look.
+      const count = Object.keys(errors).length;
+      formError.value =
+        count === 1
+          ? 'There is a problem with one field. Please check it and try again.'
+          : `There are problems with ${count} fields. Please check them and try again.`;
       status.value = 'error';
       return;
     }
