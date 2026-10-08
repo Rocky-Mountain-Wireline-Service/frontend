@@ -33,11 +33,12 @@ const logos = computed(() =>
     <div class="mx-auto max-w-5xl text-center">
       <SectionHeading v-if="section.heading" align="center">{{ section.heading }}</SectionHeading>
 
-      <ul class="mt-10 flex flex-wrap items-center justify-center gap-x-14 gap-y-10">
+      <ul class="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-6">
         <li v-for="logo in logos" :key="logo.name">
           <component
             :is="logo.url ? 'a' : 'div'"
             v-bind="logo.url ? { href: logo.url, target: '_blank', rel: 'noopener noreferrer' } : {}"
+            class="logo-plate"
             :class="logo.url ? 'focus-ring block' : 'block'"
           >
             <!--
@@ -59,3 +60,18 @@ const logos = computed(() =>
     </div>
   </section>
 </template>
+
+<style scoped>
+/*
+  These marks are drawn for a white page: navy and charcoal lettering with a
+  transparent ground. On the dark theme they all but disappear, and recolouring
+  someone else's accreditation mark is not ours to do — so in dark mode each
+  one sits on its own white plate instead. The padding is constant so the row
+  does not shift between themes.
+*/
+.logo-plate {
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  background-color: light-dark(transparent, #ffffff);
+}
+</style>
