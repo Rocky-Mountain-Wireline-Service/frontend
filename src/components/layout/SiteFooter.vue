@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { RouterLink } from 'vue-router';
 import { PortableText } from '@portabletext/vue';
 import { useSiteShell } from '@/composables/useSiteShell';
 import SmartLink from '@/components/ui/SmartLink.vue';
@@ -118,12 +117,14 @@ const copyright = computed(() =>
         <nav v-if="site.legalNav.length" aria-label="Legal">
           <ul class="flex flex-wrap gap-x-5 gap-y-1">
             <li v-for="item in site.legalNav" :key="item.href">
-              <RouterLink
+              <!-- SmartLink, not RouterLink: the MRF entry points off-site, and
+                   the router would resolve an absolute URL as an internal path. -->
+              <SmartLink
                 :to="item.href"
                 class="focus-ring-light text-white transition-colors hover:text-[var(--color-secondary)]"
               >
                 {{ item.label }}
-              </RouterLink>
+              </SmartLink>
             </li>
           </ul>
         </nav>

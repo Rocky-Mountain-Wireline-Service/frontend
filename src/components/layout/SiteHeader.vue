@@ -20,7 +20,7 @@ watch(() => route.fullPath, () => { mobileOpen.value = false; });
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-bg)]/95 backdrop-blur">
+  <header class="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-bg-card)]/95 backdrop-blur">
     <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-6">
       <RouterLink to="/" class="focus-ring flex shrink-0 items-center" :aria-label="`${site.name} — home`">
         <img
@@ -84,7 +84,7 @@ watch(() => route.fullPath, () => { mobileOpen.value = false; });
     <nav
       v-show="mobileOpen"
       id="mobile-nav"
-      class="border-t border-[var(--color-border)] bg-[var(--color-bg)] px-6 py-4 lg:hidden"
+      class="border-t border-[var(--color-border)] bg-[var(--color-bg-card)] px-6 py-4 lg:hidden"
       aria-label="Main"
     >
       <SmartLink

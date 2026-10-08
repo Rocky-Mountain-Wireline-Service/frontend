@@ -11,6 +11,12 @@ export default defineConfig(({ mode }) => {
   // service pages.
   Object.assign(process.env, loadEnv(mode, process.cwd(), 'VITE_'));
 
+  // Netlify sets URL to the site's primary address: the *.netlify.app name
+  // until a custom domain is attached, the domain afterwards. Following it
+  // keeps canonicals, og:url and the sitemap pointing at wherever this build
+  // is actually served, with no variable to remember to change at launch.
+  process.env.VITE_SITE_URL ||= process.env.URL || 'https://rmws.com';
+
   return {
     plugins: [vue(), tailwindcss()],
     resolve: {

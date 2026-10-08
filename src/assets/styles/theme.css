@@ -30,18 +30,23 @@
   --color-secondary-hover: light-dark(#b18912, #f0c94a);
   --color-accent: light-dark(#b8b8d1, #d7d7e5);
 
-  /* ── Surfaces ───────────────────────────────────────────────────────── */
-  --color-bg: light-dark(#ffffff, #141826);
+  /* ── Surfaces ───────────────────────────────────────────────────────────
+     The page ground is off-white rather than white, so a card can have an edge
+     without needing a heavy border. `bg-card` is the white that sits on it.
+     In light mode `bg` and `bg-secondary` are deliberately the same value; they
+     stay separate tokens because the dark theme still steps between them. */
+  --color-bg: light-dark(#f5f3f4, #141826);
   --color-bg-secondary: light-dark(#f5f3f4, #1c2230);
   --color-bg-tertiary: light-dark(#ede8ea, #2a3142);
   --color-bg-card: light-dark(#ffffff, #212836);
   --color-bg-hover: light-dark(#eee7e8, #2d3444);
 
   /* ── Text ───────────────────────────────────────────────────────────────
-     All three pass AA on both bg and bg-card in both themes. */
+     All three pass AA on both bg and bg-card in both themes. Muted is a step
+     darker than Tailwind's gray-500, which drops to 4.4:1 on the off-white. */
   --color-text: light-dark(#1f2937, #f3f4f6);
   --color-text-secondary: light-dark(#4b5563, #d1d5db);
-  --color-text-muted: light-dark(#6b7280, #9ca3af);
+  --color-text-muted: light-dark(#646b78, #9ca3af);
   --color-text-inverse: light-dark(#ffffff, #111827);
 
   /* ── Lines ──────────────────────────────────────────────────────────── */

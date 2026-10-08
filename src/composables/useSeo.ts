@@ -9,6 +9,13 @@ import type { Figure } from '@/types/content';
 const siteUrl = (import.meta.env.VITE_SITE_URL || 'https://rmws.com').replace(/\/$/, '');
 const SITE_NAME = 'Rocky Mountain Wireline Service';
 
+/**
+ * A build served from a *.netlify.app address is a review copy. Left indexable
+ * it would compete with rmws.com as duplicate content, so every page on it is
+ * marked noindex. This lifts by itself once the domain is attached.
+ */
+const IS_PREVIEW = /\.netlify\.app$/.test(new URL(siteUrl).hostname);
+
 export interface SeoInput {
   title?: string;
   description?: string;
@@ -83,7 +90,7 @@ export function useSeo(input: MaybeRef<SeoInput> = {}) {
     link: [{ rel: 'canonical', href: canonical }],
     meta: [
       { name: 'description', content: description },
-      ...(seo.value.noIndex ? [{ name: 'robots', content: 'noindex, nofollow' }] : []),
+      ...(seo.value.noIndex || IS_PREVIEW ? [{ name: 'robots', content: 'noindex, nofollow' }] : []),
       { property: 'og:type', content: 'website' },
       { property: 'og:site_name', content: SITE_NAME },
       { property: 'og:title', content: title },

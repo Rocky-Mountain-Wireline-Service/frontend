@@ -74,7 +74,7 @@ useHashScroll(computed(() => Boolean(service.value)));
             : 'bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-hover)]'
         "
       />
-      <div class="mx-auto w-full max-w-4xl px-6 py-16">
+      <div class="mx-auto w-full max-w-3xl px-6 py-16">
         <RouterLink
           to="/services"
           class="focus-ring-light inline-flex items-center gap-1.5 text-sm font-medium text-white/85 transition-colors hover:text-white"
@@ -82,7 +82,7 @@ useHashScroll(computed(() => Boolean(service.value)));
           <ArrowLeft :size="16" aria-hidden="true" />
           All services
         </RouterLink>
-        <h1 class="mt-4 text-balance text-4xl font-bold text-white sm:text-5xl">
+        <h1 class="mt-4 text-balance text-4xl font-bold uppercase leading-[1.08] text-white sm:text-5xl">
           {{ service?.title }}
         </h1>
       </div>
@@ -93,7 +93,7 @@ useHashScroll(computed(() => Boolean(service.value)));
         <PortableText v-if="service?.content?.length" :value="service.content" />
       </div>
 
-      <div class="mt-14 rounded-lg bg-[var(--color-bg-secondary)] p-8 text-center ring-1 ring-[var(--color-border)]">
+      <div class="mt-14 rounded-lg bg-[var(--color-bg-card)] p-8 text-center shadow-sm ring-1 ring-[var(--color-border)]">
         <p class="text-xl font-semibold">Need this service on your next job?</p>
         <RouterLink
           to="/contact#contact-form"
