@@ -21,15 +21,15 @@ watch(() => route.fullPath, () => { mobileOpen.value = false; });
 
 <template>
   <header class="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-bg-card)]/95 backdrop-blur">
-    <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-6">
+    <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-6 lg:h-20">
       <RouterLink to="/" class="focus-ring flex shrink-0 items-center" :aria-label="`${site.name} — home`">
         <img
           v-if="site.logo"
           :src="site.logo"
           :alt="site.logoAlt || site.name"
-          class="h-9 w-auto object-contain"
-          width="160"
-          height="36"
+          class="h-12 w-auto object-contain lg:h-16"
+          width="103"
+          height="64"
         />
         <span v-else class="text-lg font-bold text-[var(--color-primary-ink)]">{{ site.name }}</span>
       </RouterLink>

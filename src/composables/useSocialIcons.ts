@@ -32,6 +32,18 @@ const SOCIAL_ICONS: Record<string, string> = {
     'M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 1-1.06 1.06l-.97-.97V19.5a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5v-3a.75.75 0 0 0-.75-.75h-1.5a.75.75 0 0 0-.75.75v3a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5v-6.568l-.97.969a.75.75 0 0 1-1.06-1.06l8.69-8.69z',
 };
 
+/**
+ * Bare letterforms for the two marks that are a letter on a square. Set on a
+ * tile at full size, the tile itself becomes the logo's square — the brand
+ * paths above would instead draw a second, smaller shape inside it.
+ */
+const TILE_GLYPHS: Record<string, string> = {
+  facebook:
+    'M9.101 24v-8.289H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 1.09.079 1.372.157v3.318a8 8 0 0 0-.754-.024c-1.069 0-1.482.404-1.482 1.457v2.65h3.96l-.68 3.667h-3.28V24z',
+  linkedin:
+    'M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564z',
+};
+
 const LABELS: Record<string, string> = {
   facebook: 'Facebook',
   instagram: 'Instagram',
@@ -60,6 +72,11 @@ export function getSocialIcon(platform: string): string | null {
 export function useSocialIcons() {
   return {
     pathFor: (platform: string) => SOCIAL_ICONS[platform] ?? SOCIAL_ICONS.other,
+    /** The glyph for a solid tile, and whether it fills the tile edge to edge. */
+    tileFor: (platform: string) =>
+      TILE_GLYPHS[platform]
+        ? { path: TILE_GLYPHS[platform], full: true }
+        : { path: SOCIAL_ICONS[platform] ?? SOCIAL_ICONS.other, full: false },
     labelFor: (platform: string) =>
       `${LABELS[platform] ?? 'Website'} (opens in a new tab)`,
   };

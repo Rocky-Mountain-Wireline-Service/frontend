@@ -9,7 +9,7 @@ import { Phone, Mail, MapPin } from 'lucide-vue-next';
 import type { ContactCard } from '@/types/content';
 
 const site = useSiteShell();
-const { pathFor, labelFor } = useSocialIcons();
+const { tileFor, labelFor } = useSocialIcons();
 
 const display = (card: ContactCard) =>
   isTelHref(card.href) ? formatPhone(card.value) : card.value;
@@ -89,17 +89,22 @@ const copyright = computed(() =>
           </li>
         </ul>
 
-        <ul v-if="site.socialLinks.length" class="mt-7 flex gap-3">
+        <ul v-if="site.socialLinks.length" class="mt-7 flex gap-4">
           <li v-for="social in site.socialLinks" :key="social.url">
             <a
               :href="social.url"
               target="_blank"
               rel="noopener noreferrer"
-              class="focus-ring-light flex h-10 w-10 items-center justify-center rounded-md bg-[var(--color-secondary)] text-[#1a1a1a] transition-colors hover:bg-white"
+              class="social-tile focus-ring-light"
               :aria-label="labelFor(social.platform)"
             >
-              <svg viewBox="0 0 24 24" class="h-[18px] w-[18px] fill-current" aria-hidden="true">
-                <path :d="pathFor(social.platform)" />
+              <svg
+                viewBox="0 0 24 24"
+                class="fill-current"
+                :class="tileFor(social.platform).full ? 'h-full w-full' : 'h-7 w-7'"
+                aria-hidden="true"
+              >
+                <path :d="tileFor(social.platform).path" />
               </svg>
             </a>
           </li>
@@ -147,6 +152,31 @@ const copyright = computed(() =>
 </template>
 
 <style scoped>
+/*
+  A solid gold tile with the mark cut into it, as on the previous site, at a
+  size that clears the 44px touch target. Hover brightens the tile and adds a
+  soft gold halo — a change of light rather than of position, so nothing moves
+  for anyone who has asked for reduced motion.
+*/
+.social-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background-color: var(--color-secondary);
+  color: var(--color-footer-bg);
+  transition: background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.social-tile:hover {
+  background-color: #f2cf5b;
+  color: var(--color-footer-bg);
+  box-shadow: 0 0 0 3px rgb(214 166 22 / 0.35), 0 0 18px 2px rgb(214 166 22 / 0.55);
+}
+
 /* The gold rule again, at the smaller weight the live footer uses. */
 .footer-heading {
   display: inline-block;
