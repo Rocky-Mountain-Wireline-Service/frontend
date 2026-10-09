@@ -145,6 +145,8 @@ export function useForm(form: () => DynamicForm | null | undefined) {
         body: JSON.stringify({
           formId: def._id,
           formTitle: def.title,
+          formSlug: def.slug,
+          pagePath: window.location.pathname,
           elapsedSeconds: Math.round((Date.now() - startedAt.value) / 1000),
           website: honeypot.value,
           fields: fields.value

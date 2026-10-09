@@ -12,6 +12,7 @@
     "audit:contrast": "node tools/contrast-audit.mjs"
   },
   "dependencies": {
+    "@libsql/client": "^0.14.0",
     "@portabletext/vue": "^1.0.14",
     "@sanity/client": "^8.6.2",
     "@sanity/image-url": "^2.1.1",

@@ -11,5 +11,5 @@
     "isolatedModules": true,
     "moduleDetection": "force"
   },
-  "include": ["build/**/*.ts", "vite.config.ts"]
+  "include": ["build/**/*.ts", "netlify/**/*.ts", "vite.config.ts"]
 }

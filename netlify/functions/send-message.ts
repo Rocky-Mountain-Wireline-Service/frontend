@@ -1,7 +1,6 @@
 import type { Context } from '@netlify/functions';
 import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { storeConfigured, storeSubmission } from '../lib/submissions';
 
 const TO_EMAIL = process.env.CONTACT_TO_EMAIL || 'sales@rmws.com';
 const FROM_EMAIL = process.env.CONTACT_FROM_EMAIL || 'onboarding@resend.dev';
@@ -13,8 +12,14 @@ const MIN_ELAPSED_SECONDS = 3;
 
 const BRAND = '#710a0c';
 
+/** A submission may carry this many fields and this much text in each. */
+const MAX_FIELDS = 60;
+const MAX_VALUE_LENGTH = 10_000;
+
 interface Submission {
   formTitle?: string;
+  formSlug?: string;
+  pagePath?: string;
   fields?: { label?: string; name?: string; value?: string }[];
   attachments?: { filename?: string; contentType?: string; content?: string }[];
   website?: string;
@@ -58,8 +63,13 @@ export default async (req: Request, _context: Context) => {
     return json({ error: 'Method not allowed' }, 405);
   }
 
-  if (!process.env.RESEND_API_KEY) {
-    console.error('RESEND_API_KEY is not set — cannot send mail.');
+  // A submission goes two places: the dashboard's inbox and an email. Either
+  // one alone still gets it to the business, so neither is required — but with
+  // neither there is nowhere for it to go.
+  const canEmail = Boolean(process.env.RESEND_API_KEY);
+  const canStore = storeConfigured();
+  if (!canEmail && !canStore) {
+    console.error('Neither RESEND_API_KEY nor the submission store is configured.');
     return json({ error: 'The contact form is not configured. Please call us instead.' }, 500);
   }
 
@@ -80,7 +90,10 @@ export default async (req: Request, _context: Context) => {
     return json({ error: 'That was submitted a little too quickly. Please try again.' }, 400);
   }
 
-  const fields = (body.fields ?? []).filter((f) => f?.label && String(f.value ?? '').trim());
+  const fields = (body.fields ?? [])
+    .filter((f) => f?.label && String(f.value ?? '').trim())
+    .slice(0, MAX_FIELDS)
+    .map((f) => ({ ...f, value: String(f.value).slice(0, MAX_VALUE_LENGTH) }));
   if (!fields.length) {
     return json({ error: 'Please fill in the form before submitting.' }, 400);
   }
@@ -109,8 +122,24 @@ export default async (req: Request, _context: Context) => {
     )
     .join('');
 
-  try {
-    const { error } = await resend.emails.send({
+  const usableAttachments = attachments.filter((a) => a.filename && a.content);
+
+  const store = async () => {
+    await storeSubmission({
+      formSlug: String(body.formSlug ?? '').slice(0, 120),
+      formTitle: formTitle.slice(0, 200),
+      pagePath: String(body.pagePath ?? '').slice(0, 300),
+      fields: fields.map((f) => ({ label: f.label!, name: f.name ?? '', value: String(f.value) })),
+      files: usableAttachments.map((a) => ({
+        filename: a.filename!.slice(0, 200),
+        contentType: a.contentType ?? '',
+        content: a.content!,
+      })),
+    });
+  };
+
+  const email = async () => {
+    const { error } = await new Resend(process.env.RESEND_API_KEY).emails.send({
       from: FROM_EMAIL,
       to: TO_EMAIL,
       ...(replyTo ? { replyTo: String(replyTo) } : {}),
@@ -136,15 +165,20 @@ export default async (req: Request, _context: Context) => {
         </div>
       `,
     });
+    if (error) throw new Error(`Resend: ${JSON.stringify(error)}`);
+  };
 
-    if (error) {
-      console.error('Resend error:', error);
-      return json({ error: 'Failed to send your message. Please try again.' }, 502);
-    }
+  // Run side by side and judged together: one failing must not lose a
+  // submission the other has already delivered.
+  const [stored, emailed] = await Promise.allSettled([
+    canStore ? store() : Promise.reject(new Error('not configured')),
+    canEmail ? email() : Promise.reject(new Error('not configured')),
+  ]);
+  if (canStore && stored.status === 'rejected') console.error('Storing the submission failed:', stored.reason);
+  if (canEmail && emailed.status === 'rejected') console.error('Emailing the submission failed:', emailed.reason);
 
-    return json({ success: true }, 200);
-  } catch (err) {
-    console.error('send-message failed:', err);
-    return json({ error: 'An unexpected error occurred. Please try again.' }, 500);
+  if (stored.status === 'rejected' && emailed.status === 'rejected') {
+    return json({ error: 'Failed to send your message. Please try again.' }, 502);
   }
+  return json({ success: true }, 200);
 };
