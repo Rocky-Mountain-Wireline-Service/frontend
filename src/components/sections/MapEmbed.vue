@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import SectionHeading from '@/components/ui/SectionHeading.vue';
 
 const props = defineProps<{
@@ -36,6 +36,35 @@ const safeUrl = computed(() => {
   }
 });
 
+/**
+ * The map is only put on the page as someone scrolls toward it. `loading="lazy"`
+ * alone was not enough: on a phone the browser still fetched ~400KB of Google
+ * Maps code for a map at the very bottom of the contact page, which held up
+ * everything above it. Until then an empty block of the same height holds its
+ * place, so nothing shifts when it arrives.
+ */
+const holder = ref<HTMLElement | null>(null);
+const showMap = ref(false);
+let observer: IntersectionObserver | null = null;
+
+onMounted(() => {
+  if (!('IntersectionObserver' in window) || !holder.value) {
+    showMap.value = true;
+    return;
+  }
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        showMap.value = true;
+        observer?.disconnect();
+      }
+    },
+    { rootMargin: '300px 0px' }
+  );
+  observer.observe(holder.value);
+});
+onBeforeUnmount(() => observer?.disconnect());
+
 const HEIGHTS = {
   short: 'h-72 sm:h-80',
   medium: 'h-80 sm:h-[26rem]',
@@ -61,6 +90,7 @@ const heightClass = computed(() => HEIGHTS[props.section.height ?? 'medium']);
       exactly the seam this layout is trying to avoid.
     -->
     <iframe
+      v-if="showMap"
       :src="safeUrl"
       :title="section.label || 'Map'"
       :class="['block w-full border-0', heightClass]"
@@ -68,5 +98,6 @@ const heightClass = computed(() => HEIGHTS[props.section.height ?? 'medium']);
       referrerpolicy="no-referrer-when-downgrade"
       allowfullscreen
     />
+    <div v-else ref="holder" :class="['block w-full bg-[var(--color-bg-tertiary)]', heightClass]" aria-hidden="true" />
   </section>
 </template>

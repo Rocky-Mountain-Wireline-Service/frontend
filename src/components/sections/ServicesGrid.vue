@@ -46,9 +46,14 @@ defineProps<{
               />
             </div>
             <div class="flex flex-1 flex-col p-6">
-              <h3 class="font-[var(--font-heading)] text-base font-bold uppercase leading-snug text-[var(--color-heading)]">
+              <!-- One level under the section heading, or under the page's h1
+                   when the section has none: headings must not skip a level. -->
+              <component
+                :is="section.heading ? 'h3' : 'h2'"
+                class="font-[var(--font-heading)] text-base font-bold uppercase leading-snug text-[var(--color-heading)]"
+              >
                 {{ service.title }}
-              </h3>
+              </component>
               <p v-if="service.summary" class="mt-3 flex-1 text-sm leading-relaxed text-[var(--color-text-secondary)]">
                 {{ service.summary }}
               </p>

@@ -64,7 +64,9 @@ withDefaults(
               variant="outline"
               class="focus-ring mt-7"
             >
-              Read More
+              <!-- "Read More" four times over tells a screen reader, and Google,
+                   nothing about where each one goes; the title says it. -->
+              Read More<span class="sr-only"> about {{ card.title }}</span>
             </BaseButton>
           </div>
         </article>
@@ -95,7 +97,7 @@ withDefaults(
                 <PortableText :value="card.body" />
               </div>
               <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-primary-ink)]">
-                Read More
+                Read More<span class="sr-only"> about {{ card.title }}</span>
                 <ArrowRight :size="16" class="transition-transform group-hover:translate-x-1" />
               </span>
             </div>

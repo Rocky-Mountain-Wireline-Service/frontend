@@ -18,13 +18,19 @@ const props = withDefaults(
 );
 
 /** Widths the CDN is asked for. Anything wider than the source is skipped by Sanity. */
-const WIDTHS = [400, 640, 960, 1280, 1920];
+const WIDTHS = [400, 640, 768, 960, 1280, 1920];
+
+/**
+ * Photographs of trucks and well sites hold up well at 72; at 80 the hero
+ * alone was most of a phone's first-load budget for no visible difference.
+ */
+const QUALITY = 72;
 
 const base = computed(() => (props.figure?.asset ? sanityImage(props.figure) : null));
 
 const src = computed(() => {
   if (!base.value) return '';
-  let b = base.value.width(props.width).auto('format').quality(80);
+  let b = base.value.width(props.width).auto('format').quality(QUALITY);
   if (props.height) b = b.height(props.height).fit('crop');
   return b.url();
 });
@@ -32,7 +38,7 @@ const src = computed(() => {
 const srcset = computed(() => {
   if (!base.value) return undefined;
   return WIDTHS.map((w) => {
-    let b = base.value!.width(w).auto('format').quality(80);
+    let b = base.value!.width(w).auto('format').quality(QUALITY);
     if (props.height) {
       b = b.height(Math.round((props.height / props.width) * w)).fit('crop');
     }

@@ -39,6 +39,8 @@ const copyright = computed(() =>
           class="h-20 w-auto object-contain"
           width="280"
           height="80"
+          loading="lazy"
+          decoding="async"
         />
         <p v-else class="font-[var(--font-heading)] text-lg font-bold text-white">{{ site.name }}</p>
 

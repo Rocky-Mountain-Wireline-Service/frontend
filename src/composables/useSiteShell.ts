@@ -52,9 +52,11 @@ export function useSiteShell() {
     developerCredit: computed(() => settings.value?.developerCredit ?? ''),
     developerUrl: computed(() => settings.value?.developerUrl ?? ''),
 
-    logo: computed(() => url(settings.value?.logo)),
+    // Sized for where each is shown, at twice the CSS size for sharp screens:
+    // the header logo is 64px tall (about 100px wide), the footer's 80px.
+    logo: computed(() => url(settings.value?.logo, 240)),
     logoAlt: computed(() => settings.value?.logo?.alt || settings.value?.siteName || FALLBACK_NAME),
-    footerLogo: computed(() => url(settings.value?.footerLogo) || url(settings.value?.logo)),
+    footerLogo: computed(() => url(settings.value?.footerLogo, 320) || url(settings.value?.logo, 320)),
     footerLogoAlt: computed(
       () => settings.value?.footerLogo?.alt || settings.value?.logo?.alt || FALLBACK_NAME
     ),

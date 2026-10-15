@@ -2,6 +2,11 @@ import { ViteSSG } from 'vite-ssg';
 import { createPinia } from 'pinia';
 import App from './App.vue';
 import { routes } from './router';
+// Fonts ship with the site rather than from Google. The Google stylesheet was
+// the single slowest thing on a phone: it blocked the first paint by ~0.8s
+// while a second domain was looked up and connected to.
+import '@fontsource-variable/inter';
+import '@fontsource-variable/plus-jakarta-sans';
 import './assets/styles/main.css';
 
 /**
