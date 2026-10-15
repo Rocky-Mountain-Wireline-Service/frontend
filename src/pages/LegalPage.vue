@@ -16,10 +16,13 @@ const { data: page, loading } = useSanityQuery<LegalPage>(LEGAL_BY_SLUG, { slug:
 
 const formattedDate = computed(() =>
   page.value?.lastUpdated
-    ? new Date(page.value.lastUpdated).toLocaleDateString('en-US', {
+    ? // A date-only value parses as midnight UTC; formatted in a US timezone it
+      // would show the day before. Formatting in UTC keeps the date as entered.
+      new Date(page.value.lastUpdated).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
+        timeZone: 'UTC',
       })
     : ''
 );

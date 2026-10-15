@@ -33,7 +33,13 @@ declare global {
 
 let enabled = false;
 
+/**
+ * Do Not Track, or Global Privacy Control — the opt-out signal Colorado's
+ * privacy law recognizes. Either one means analytics never loads: no cookie,
+ * no request. The privacy policy promises exactly this.
+ */
 function doNotTrackEnabled(): boolean {
+  if ((navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl === true) return true;
   const signals = [
     navigator.doNotTrack,
     window.doNotTrack,
@@ -153,7 +159,13 @@ export function initAnalytics(_router: Router): void {
   };
 
   window.gtag('js', new Date());
-  window.gtag('config', measurementId, { send_page_view: false });
+  // No advertising features: the privacy policy says the Site does not use
+  // them, and this is what makes that true whatever the GA property's settings.
+  window.gtag('config', measurementId, {
+    send_page_view: false,
+    allow_google_signals: false,
+    allow_ad_personalization_signals: false,
+  });
   enabled = true;
 
   trackContactLinks();
