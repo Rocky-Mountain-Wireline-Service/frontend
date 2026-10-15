@@ -70,9 +70,9 @@
   --color-band: light-dark(#004075, #002d52);
 
   /* ── Headings ───────────────────────────────────────────────────────────
-     The live site sets headings in near-black rather than the body's blue-grey,
+     The live site sets headings in near-black rather than the body's blue-gray,
      which is what gives its section titles their weight. Kept as its own token
-     so heading colour can move without dragging body copy with it. */
+     so heading color can move without dragging body copy with it. */
   --color-heading: light-dark(#111111, #f5f5f5);
 
   /* The 5px gold rule under every section heading is the strongest piece of

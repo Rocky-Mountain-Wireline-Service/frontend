@@ -12,7 +12,7 @@ const props = defineProps<{
 }>();
 
 /**
- * These are accreditation marks, so the organisation name is the alt text —
+ * These are accreditation marks, so the organization name is the alt text —
  * `name` is required in the schema and doubles as the accessible label.
  */
 const logos = computed(() =>
@@ -64,7 +64,7 @@ const logos = computed(() =>
 <style scoped>
 /*
   These marks are drawn for a white page: navy and charcoal lettering with a
-  transparent ground. On the dark theme they all but disappear, and recolouring
+  transparent ground. On the dark theme they all but disappear, and recoloring
   someone else's accreditation mark is not ours to do — so in dark mode each
   one sits on its own white plate instead. The padding is constant so the row
   does not shift between themes.

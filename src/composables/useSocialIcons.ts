@@ -66,7 +66,7 @@ export function getSocialIcon(platform: string): string | null {
 /**
  * Icons render as inline `<svg><path>` rather than as components, so the footer
  * ships one shared 24x24 viewBox and no per-brand component in the bundle.
- * An unrecognised platform falls back to the globe rather than rendering an
+ * An unrecognized platform falls back to the globe rather than rendering an
  * empty link with no accessible name.
  */
 export function useSocialIcons() {

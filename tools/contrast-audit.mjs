@@ -13,7 +13,7 @@
  *
  * So CSS is used only as a fast filter. Anything that looks like a failure is
  * then confirmed by hiding the text, screenshotting the region, and comparing
- * the text colour against the worst background pixel underneath it — a
+ * the text color against the worst background pixel underneath it — a
  * headline is only as readable as its least contrasty stretch.
  *
  * Usage:  node tools/contrast-audit.mjs [baseUrl]
@@ -184,11 +184,11 @@ for (const scheme of ['light', 'dark']) {
     if (process.env.AUDIT_SELFTEST === '1' && route === '/') {
       await page.evaluate(() => {
         const mk = (style, text) => { const p = document.createElement('p'); p.textContent = text; p.setAttribute('style', style); document.body.appendChild(p); };
-        mk('color:#cccccc;background:#ffffff;font-size:16px', 'SELFTEST pale grey on white');
+        mk('color:#cccccc;background:#ffffff;font-size:16px', 'SELFTEST pale gray on white');
         mk('color:rgba(255,255,255,0.35);background:#f5f3f4;font-size:16px', 'SELFTEST translucent white');
         const hero = document.querySelector('section.relative');
         const over = document.createElement('p');
-        over.textContent = 'SELFTEST dark grey over hero photo';
+        over.textContent = 'SELFTEST dark gray over hero photo';
         over.setAttribute('style', 'position:relative;z-index:20;color:#3a3a3a;font-size:16px');
         hero?.querySelector('div')?.appendChild(over);
       });

@@ -111,7 +111,7 @@ export default async (req: Request, _context: Context) => {
   // person who filled in the form rather than the sending domain.
   const replyTo = fields.find((f) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(f.value).trim()))?.value;
 
-  const formTitle = body.formTitle || 'Website enquiry';
+  const formTitle = body.formTitle || 'Website inquiry';
   const rows = fields
     .map(
       (f) => `

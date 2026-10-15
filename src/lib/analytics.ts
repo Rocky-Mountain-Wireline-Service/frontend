@@ -8,7 +8,7 @@ import type { Router } from 'vue-router';
  * questions that matter are: how many people asked for a quote, how many picked
  * up the phone, and which services drove them there. Those are the events below.
  *
- * Two behaviours the Gatsby plugin gave for free and a bare gtag snippet does
+ * Two behaviors the Gatsby plugin gave for free and a bare gtag snippet does
  * not:
  *
  *   1. Page views on client-side navigation. gtag only fires automatically on

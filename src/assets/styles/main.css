@@ -150,7 +150,7 @@
   margin-block: 2.5em;
 }
 
-/* On a dark ground the muted body colour drops below contrast; inherit instead. */
+/* On a dark ground the muted body color drops below contrast; inherit instead. */
 .prose-body--invert {
   color: inherit;
   max-width: none;

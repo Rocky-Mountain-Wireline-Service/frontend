@@ -55,7 +55,7 @@ const compact = computed(() => !hasSubstance.value);
     show. Moving the text beside the image removes the conflict: the type gets a
     controlled ground at full contrast, and the photograph is never darkened.
     The red block also repeats the locations band, so the page opens on brand
-    rather than on a wash of grey.
+    rather than on a wash of gray.
   -->
   <section
     v-if="resolved === 'panel'"

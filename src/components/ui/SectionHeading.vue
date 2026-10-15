@@ -14,8 +14,8 @@ withDefaults(
 <template>
   <!--
     The uppercase title over a 5px gold rule is the live site's most
-    recognisable piece of brand vocabulary, repeated on every section. It lives
-    in one component so the rule's weight, colour and spacing cannot drift
+    recognizable piece of brand vocabulary, repeated on every section. It lives
+    in one component so the rule's weight, color and spacing cannot drift
     between sections the way they had in the original stylesheets.
   -->
   <component
