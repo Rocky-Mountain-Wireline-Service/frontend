@@ -2,7 +2,7 @@ import type { Context } from '@netlify/functions';
 import { Resend } from 'resend';
 import { storeConfigured, storeSubmission } from '../lib/submissions';
 
-const TO_EMAIL = process.env.CONTACT_TO_EMAIL || 'sales@rmws.com';
+const DEFAULT_TO_EMAIL = process.env.CONTACT_TO_EMAIL || 'sales@rmws.com';
 const FROM_EMAIL = process.env.CONTACT_FROM_EMAIL || 'onboarding@resend.dev';
 const SITE_DOMAIN = process.env.SITE_DOMAIN || 'rmws.com';
 
@@ -17,6 +17,7 @@ const MAX_FIELDS = 60;
 const MAX_VALUE_LENGTH = 10_000;
 
 interface Submission {
+  formId?: string;
   formTitle?: string;
   formSlug?: string;
   pagePath?: string;
@@ -24,6 +25,30 @@ interface Submission {
   attachments?: { filename?: string; contentType?: string; content?: string }[];
   website?: string;
   elapsedSeconds?: number;
+}
+
+/**
+ * Where a form's submissions are emailed: the "Send submissions to" address on
+ * the form in the Studio, so the client can change it without a developer.
+ * Looked up on the server by the form's ID — the address is never taken from
+ * the request — and CONTACT_TO_EMAIL is used whenever the lookup fails.
+ */
+async function recipientFor(formId: string | undefined): Promise<string> {
+  const projectId = process.env.VITE_SANITY_PROJECT_ID;
+  const dataset = process.env.VITE_SANITY_DATASET;
+  if (!formId || !/^[\w.-]+$/.test(formId) || !projectId || !dataset) return DEFAULT_TO_EMAIL;
+  try {
+    const params = new URLSearchParams({
+      query: '*[_type == "dynamicForm" && _id == $id][0].notifyEmail',
+      $id: JSON.stringify(formId),
+      perspective: 'published',
+    });
+    const res = await fetch(`https://${projectId}.apicdn.sanity.io/v2024-01-01/data/query/${dataset}?${params}`);
+    const email = res.ok ? ((await res.json()) as { result?: unknown }).result : null;
+    return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) ? email.trim() : DEFAULT_TO_EMAIL;
+  } catch {
+    return DEFAULT_TO_EMAIL;
+  }
 }
 
 const json = (body: unknown, status: number) =>
@@ -139,9 +164,10 @@ export default async (req: Request, _context: Context) => {
   };
 
   const email = async () => {
+    const to = await recipientFor(body.formId);
     const { error } = await new Resend(process.env.RESEND_API_KEY).emails.send({
       from: FROM_EMAIL,
-      to: TO_EMAIL,
+      to,
       ...(replyTo ? { replyTo: String(replyTo) } : {}),
       subject: `${formTitle} — ${SITE_DOMAIN}`,
       attachments: attachments
