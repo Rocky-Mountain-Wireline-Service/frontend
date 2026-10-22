@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { sanityImage } from '@/composables/useSanityImage';
+import { imageDimensions, sanityImage } from '@/composables/useSanityImage';
 import SectionHeading from '@/components/ui/SectionHeading.vue';
 import type { SanityRef } from '@/types/content';
 
@@ -24,6 +24,7 @@ const logos = computed(() =>
       // source files are only 200x170, so Sanity cannot deliver more detail
       // than that — see the note on sizing below.
       src: sanityImage(l.logo).width(400).fit('max').auto('format').url(),
+      dims: imageDimensions(l.logo, 200),
     }))
 );
 </script>
@@ -50,6 +51,8 @@ const logos = computed(() =>
             <img
               :src="logo.src"
               :alt="logo.name"
+              :width="logo.dims?.width"
+              :height="logo.dims?.height"
               loading="lazy"
               decoding="async"
               class="h-28 w-auto object-contain sm:h-36 lg:h-40"

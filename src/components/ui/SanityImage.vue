@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { sanityImage } from '@/composables/useSanityImage';
+import { imageDimensions, sanityImage } from '@/composables/useSanityImage';
 import type { Figure } from '@/types/content';
 
 const props = withDefaults(
@@ -46,6 +46,11 @@ const srcset = computed(() => {
   }).join(', ');
 });
 
+/** Reserves the image's space before it loads (CSS still sizes it). */
+const dims = computed(() =>
+  props.height ? { width: props.width, height: props.height } : imageDimensions(props.figure, props.width)
+);
+
 /**
  * A decorative image takes an empty alt so screen readers skip it. An image
  * that is missing its alt text also takes an empty alt — announcing a filename
@@ -62,6 +67,8 @@ const alt = computed(() => (props.figure?.decorative ? '' : props.figure?.alt ||
     :srcset="srcset"
     :sizes="sizes"
     :alt="alt"
+    :width="dims?.width"
+    :height="dims?.height"
     :loading="eager ? 'eager' : 'lazy'"
     :fetchpriority="eager ? 'high' : undefined"
     decoding="async"
