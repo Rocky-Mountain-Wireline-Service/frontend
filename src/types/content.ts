@@ -74,6 +74,8 @@ export interface Location {
   phone: string;
   streetAddress?: string;
   postalCode?: string;
+  /** The branch's contact person, by name. */
+  contact?: string;
 }
 
 export interface FormField {

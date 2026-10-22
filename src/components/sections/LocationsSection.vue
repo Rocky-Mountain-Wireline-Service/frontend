@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import SectionHeading from '@/components/ui/SectionHeading.vue';
+import { RouterLink } from 'vue-router';
 import { formatPhone, telHref } from '@/lib/format';
 import type { Location } from '@/types/content';
 
 defineProps<{
   section: { heading?: string; locations?: Location[] };
 }>();
+
+/** The staff card's anchor on the Contact page; matches StaffDirectory's ids. */
+const staffAnchor = (name: string) => `/contact#${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 </script>
 
 <template>
@@ -32,6 +36,15 @@ defineProps<{
         <li v-for="loc in section.locations" :key="`${loc.city}-${loc.state}`">
           <p class="font-[var(--font-heading)] text-lg font-bold">
             {{ loc.city }}, {{ loc.state }}
+          </p>
+          <p v-if="loc.contact" class="mt-1 text-sm text-white">
+            Contact:
+            <RouterLink
+              :to="staffAnchor(loc.contact)"
+              class="focus-ring-light font-semibold text-white underline underline-offset-4 hover:text-[var(--color-secondary)]"
+            >
+              {{ loc.contact }}
+            </RouterLink>
           </p>
           <p v-if="loc.streetAddress" class="mt-1 text-sm text-white/75">
             {{ loc.streetAddress }}<template v-if="loc.postalCode">, {{ loc.postalCode }}</template>
