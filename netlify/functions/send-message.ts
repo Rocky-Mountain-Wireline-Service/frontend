@@ -106,8 +106,11 @@ function renderValue(value: string): string {
 
 export default async (req: Request, _context: Context) => {
   // GET hands the page a signed token when a form appears (see formGuard.ts).
+  // `ready` doubles as the uptime monitor's check: false means the site has
+  // lost both delivery routes (email and dashboard) and inquiries would fail.
   if (req.method === 'GET') {
-    return new Response(JSON.stringify({ token: issueToken() }), {
+    const ready = Boolean(process.env.RESEND_API_KEY) || storeConfigured();
+    return new Response(JSON.stringify({ token: issueToken(), ready }), {
       headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
     });
   }
