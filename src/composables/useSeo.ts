@@ -23,8 +23,6 @@ export interface SeoInput {
   noIndex?: boolean;
   /** Used as the title when the document supplies none. */
   fallbackHeading?: string;
-  /** Page hero, used for sharing when no explicit social image is set. */
-  fallbackImage?: Figure | null;
   /**
    * False while the page is still fetching. The analytics page view waits for
    * this, so a view is never recorded against a half-resolved title.
@@ -81,9 +79,13 @@ export function useSeo(input: MaybeRef<SeoInput> = {}) {
    * project — so every page advertised a social image that 404s, and every
    * share rendered with a broken preview. Omitting the tag is better than
    * pointing at nothing: platforms then fall back to their own treatment.
+   *
+   * Page photos are not used: they come in every size and shape (one service
+   * photo is a 439px portrait), and a forced 1200x630 crop of them shared
+   * badly. A page shares the branded card unless it sets its own image.
    */
   const image = computed(() => {
-    const figure = seo.value.image ?? seo.value.fallbackImage ?? site.defaultSeo?.image;
+    const figure = seo.value.image ?? site.defaultSeo?.image;
     if (!figure?.asset) return '';
     // Facebook and LinkedIn expect 1200x630 and crop anything else unpredictably.
     return sanityImage(figure).width(1200).height(630).fit('crop').auto('format').url();

@@ -5,7 +5,7 @@ import { useSanityQuery } from '@/composables/useSanityQuery';
 import { useSeo } from '@/composables/useSeo';
 import { useHashScroll } from '@/composables/useHashScroll';
 import PageSections from '@/components/layout/PageSections.vue';
-import type { Figure, Page } from '@/types/content';
+import type { Page } from '@/types/content';
 
 /**
  * Every composed page renders through this one component.
@@ -41,8 +41,6 @@ const { data: page } = useSanityQuery<Page>(
 
 const hero = computed(() => page.value?.sections?.find((s) => s._type === 'heroSection'));
 const firstHeroHeading = computed(() => hero.value?.heading as string | undefined);
-const firstHeroImage = computed(() => (hero.value?.image ?? null) as Figure | null);
-
 useSeo(
   computed(() => ({
     title: page.value?.seo?.title || page.value?.title,
@@ -51,7 +49,6 @@ useSeo(
     noIndex: page.value?.seo?.noIndex,
     ready: Boolean(page.value),
     fallbackHeading: firstHeroHeading.value,
-    fallbackImage: firstHeroImage.value,
   }))
 );
 

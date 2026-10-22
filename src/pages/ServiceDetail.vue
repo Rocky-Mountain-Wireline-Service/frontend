@@ -45,7 +45,7 @@ useSeo(
       service.value?.seo?.description ||
       derivedDescription.value ||
       `${service.value?.title ?? 'Wireline services'} from Rocky Mountain Wireline Service. Contact us to request a quote for your next job.`,
-    image: service.value?.seo?.image || service.value?.image,
+    image: service.value?.seo?.image,
     noIndex: service.value?.seo?.noIndex,
     ready: Boolean(service.value),
   }))
