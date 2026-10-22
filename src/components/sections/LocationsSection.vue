@@ -37,6 +37,9 @@ const staffAnchor = (name: string) => `/contact#${name.toLowerCase().replace(/[^
           <p class="font-[var(--font-heading)] text-lg font-bold">
             {{ loc.city }}, {{ loc.state }}
           </p>
+          <p v-if="loc.streetAddress" class="mt-1 text-sm text-white/75">
+            {{ loc.streetAddress }}<template v-if="loc.postalCode">, {{ loc.postalCode }}</template>
+          </p>
           <p v-if="loc.contact" class="mt-1 text-sm text-white">
             Contact:
             <RouterLink
@@ -45,9 +48,6 @@ const staffAnchor = (name: string) => `/contact#${name.toLowerCase().replace(/[^
             >
               {{ loc.contact }}
             </RouterLink>
-          </p>
-          <p v-if="loc.streetAddress" class="mt-1 text-sm text-white/75">
-            {{ loc.streetAddress }}<template v-if="loc.postalCode">, {{ loc.postalCode }}</template>
           </p>
           <a
             v-if="loc.phone"

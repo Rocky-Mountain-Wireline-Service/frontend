@@ -46,10 +46,18 @@ export function useSeo(input: MaybeRef<SeoInput> = {}) {
 
   const seo = computed(() => unref(input));
 
+  /**
+   * "Page - Rocky Mountain Wireline Service", or "Page | RMWS" when the full
+   * name would push the title past the ~60 characters Google shows. The words
+   * people search for come first either way, and RMWS is a name customers
+   * already search by.
+   */
   const title = computed(() => {
     const t = seo.value.title || seo.value.fallbackHeading;
     if (!t) return SITE_NAME;
-    return t.includes(SITE_NAME) ? t : `${t} - ${SITE_NAME}`;
+    if (t.includes(SITE_NAME) || /\bRMWS\b/.test(t)) return t;
+    const full = `${t} - ${SITE_NAME}`;
+    return full.length <= 60 ? full : `${t} | RMWS`;
   });
 
   /**
@@ -145,6 +153,19 @@ export function useOrganizationSchema() {
 
   useHead({
     script: computed(() => [
+      {
+        // The site's name for Google, which shows it above each result. With
+        // this in place the full business name appears there even when a
+        // page's title ends in the short "| RMWS".
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: site.name,
+          alternateName: 'RMWS',
+          url: `${siteUrl}/`,
+        }),
+      },
       {
         type: 'application/ld+json',
         innerHTML: JSON.stringify({
