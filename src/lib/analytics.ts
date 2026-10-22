@@ -131,6 +131,7 @@ function contentGroup(path: string): string {
  * the real title depends on a network round trip, not on rendering.
  */
 export function trackPageView(path: string, title: string): void {
+  if (typeof window === 'undefined') return; // prerender
   track('page_view', {
     page_path: path,
     page_location: window.location.href,

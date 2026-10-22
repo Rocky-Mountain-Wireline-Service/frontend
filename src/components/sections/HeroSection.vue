@@ -128,11 +128,13 @@ const compact = computed(() => !hasSubstance.value);
       eager
       class-name="absolute inset-0 -z-20 h-full w-full object-cover"
     />
+    <!-- On narrow screens the title runs most of the width, so the scrim stays
+         dark enough at its right edge to hold white text over a bright photo. -->
     <div
       class="absolute inset-0 -z-10"
       :class="
         section.image?.asset
-          ? 'bg-gradient-to-r from-black/88 via-black/70 to-black/15'
+          ? 'bg-gradient-to-r from-black/88 via-black/70 to-black/50 lg:to-black/15'
           : 'bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-hover)]'
       "
     />

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { PortableText } from '@portabletext/vue';
+import { richTextComponents, withHeadingOrder } from '@/lib/richText';
 import SanityImage from '@/components/ui/SanityImage.vue';
 import SectionHeading from '@/components/ui/SectionHeading.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
@@ -56,7 +57,7 @@ withDefaults(
           <div>
             <SectionHeading as="h3">{{ card.title }}</SectionHeading>
             <div v-if="card.body?.length" class="prose-body mt-5">
-              <PortableText :value="card.body" />
+              <PortableText :value="withHeadingOrder(card.body, 3)" :components="richTextComponents" />
             </div>
             <BaseButton
               v-if="card.link?.href"
@@ -94,7 +95,7 @@ withDefaults(
                 {{ card.title }}
               </h3>
               <div v-if="card.body?.length" class="prose-body mt-3 line-clamp-4 flex-1 text-sm">
-                <PortableText :value="card.body" />
+                <PortableText :value="withHeadingOrder(card.body, 3)" :components="richTextComponents" />
               </div>
               <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-primary-ink)]">
                 Read More<span class="sr-only"> about {{ card.title }}</span>

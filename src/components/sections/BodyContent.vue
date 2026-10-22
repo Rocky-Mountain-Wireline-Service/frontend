@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { PortableText } from '@portabletext/vue';
+import { richTextComponents, withHeadingOrder } from '@/lib/richText';
 import SanityImage from '@/components/ui/SanityImage.vue';
 import type { Figure, PortableText as PT } from '@/types/content';
 import SectionHeading from '@/components/ui/SectionHeading.vue';
@@ -66,7 +67,7 @@ const body = computed(() =>
       <div>
         <SectionHeading v-if="heading">{{ heading }}</SectionHeading>
         <div class="prose-body" :class="heading ? 'mt-6' : ''">
-          <PortableText v-if="body?.length" :value="body" />
+          <PortableText v-if="body?.length" :value="withHeadingOrder(body)" :components="richTextComponents" />
         </div>
       </div>
     </div>

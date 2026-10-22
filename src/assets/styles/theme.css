@@ -23,7 +23,7 @@
      page background and 5.1:1 on cards. */
   --color-primary: light-dark(#710a0c, #a00e11);
   --color-primary-hover: light-dark(#4c0708, #b81417);
-  --color-primary-ink: light-dark(#710a0c, #f36d6f);
+  --color-primary-ink: light-dark(#710a0c, #f47c7e);
   --color-primary-ink-hover: light-dark(#4c0708, #ff9ea0);
 
   --color-secondary: light-dark(#d6a616, #eabd35);

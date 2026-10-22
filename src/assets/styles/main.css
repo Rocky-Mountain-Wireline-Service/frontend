@@ -100,6 +100,11 @@
 .prose-body h3 { font-size: 1.25rem; }
 .prose-body h4 { font-size: 1.0625rem; }
 
+/* Headings promoted to keep the outline in order (src/lib/richText.ts) keep
+   the size the editor picked. */
+.prose-body .look-h3 { font-size: 1.25rem; }
+.prose-body .look-h4 { font-size: 1.0625rem; }
+
 /* A heading opening a block has the section's own spacing above it already. */
 .prose-body > :first-child {
   margin-top: 0;

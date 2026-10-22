@@ -40,6 +40,29 @@ const isMultiColumn = computed(() => fields.value.some((f) => f.width && f.width
 const cardWidth = computed(() => (isMultiColumn.value ? 'max-w-4xl' : 'max-w-2xl'));
 
 const fieldId = (name: string) => `field-${name}`;
+
+/**
+ * Autofill hints (WCAG 1.3.5, Identify Input Purpose). Field names are fixed by
+ * an admin in Studio, so the common ones are mapped here; anything else falls
+ * back on its type.
+ */
+const AUTOCOMPLETE: Record<string, string> = {
+  name: 'name',
+  fullname: 'name',
+  firstname: 'given-name',
+  lastname: 'family-name',
+  email: 'email',
+  phone: 'tel',
+  homephone: 'home tel',
+  company: 'organization',
+  address: 'street-address',
+  city: 'address-level2',
+  state: 'address-level1',
+  zip: 'postal-code',
+};
+const autocompleteFor = (field: { name: string; type: string }) =>
+  AUTOCOMPLETE[field.name.toLowerCase()] ??
+  (field.type === 'email' ? 'email' : field.type === 'phone' ? 'tel' : undefined);
 const errorId = (name: string) => `field-${name}-error`;
 
 const SPANS = {
@@ -86,7 +109,7 @@ const errorTextClass = computed(() =>
 const inputClass = computed(() =>
   isBrand.value
     ? 'w-full rounded-md border border-transparent bg-white px-3.5 py-2.5 text-[#1f2937] transition-colors placeholder:text-[#6b7280] focus:border-[var(--color-secondary)] focus-visible:outline-3 focus-visible:outline-dashed focus-visible:outline-white focus-visible:outline-offset-2'
-    : 'w-full rounded-md border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-[var(--color-text)] transition-colors placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus-visible:outline-3 focus-visible:outline-dashed focus-visible:outline-[var(--color-primary)] focus-visible:outline-offset-2'
+    : 'w-full rounded-md border border-[var(--color-border)] bg-[var(--color-bg)] px-3.5 py-2.5 text-[var(--color-text)] transition-colors placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus-visible:outline-3 focus-visible:outline-dashed focus-visible:outline-[var(--color-primary-ink)] focus-visible:outline-offset-2'
 );
 const submitClass = computed(() =>
   isBrand.value
@@ -235,11 +258,14 @@ const submitClass = computed(() =>
               :class="[
                 inputClass,
                 'flex cursor-pointer items-center gap-2',
+                // The real input is visually hidden, so the label shows its keyboard focus.
+                'has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-dashed has-[:focus-visible]:outline-offset-2',
+                isBrand ? 'has-[:focus-visible]:outline-white' : 'has-[:focus-visible]:outline-[var(--color-primary-ink)]',
                 isBrand ? 'text-[#4b5563]' : 'text-[var(--color-text-secondary)]',
               ]"
             >
               <Paperclip :size="16" aria-hidden="true" />
-              <span class="truncate">{{ files[field.name]?.name || 'Choose a file (max 4MB)' }}</span>
+              <span class="min-w-0 break-words">{{ files[field.name]?.name || 'Choose a file (max 4MB)' }}</span>
               <input
                 :id="fieldId(field.name)"
                 type="file"
@@ -256,6 +282,7 @@ const submitClass = computed(() =>
               :id="fieldId(field.name)"
               v-model="values[field.name]"
               :name="field.name"
+              :autocomplete="autocompleteFor(field)"
               :type="field.type === 'phone' ? 'tel' : field.type === 'email' ? 'email' : field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'"
               :required="field.required"
               :aria-invalid="Boolean(errors[field.name])"

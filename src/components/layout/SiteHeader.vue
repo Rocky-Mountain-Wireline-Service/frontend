@@ -17,10 +17,18 @@ const onQuoteClick = (placement: string) => track('quote_cta_click', { placement
 // Close the menu on navigation, so a link tapped in the drawer does not leave
 // it covering the page it just opened.
 watch(() => route.fullPath, () => { mobileOpen.value = false; });
+
+// Escape closes the open menu and hands focus back to the button that opened it.
+const menuButton = ref<HTMLButtonElement | null>(null);
+function onKeydown(e: KeyboardEvent) {
+  if (e.key !== 'Escape' || !mobileOpen.value) return;
+  mobileOpen.value = false;
+  menuButton.value?.focus();
+}
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-bg-card)]/95 backdrop-blur">
+  <header @keydown="onKeydown" class="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-bg-card)]/95 backdrop-blur">
     <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-6 lg:h-20">
       <RouterLink to="/" class="focus-ring flex shrink-0 items-center" :aria-label="`${site.name} — home`">
         <img
@@ -70,6 +78,7 @@ watch(() => route.fullPath, () => { mobileOpen.value = false; });
         <button
           type="button"
           class="focus-ring -mr-1 rounded-md p-1.5 text-[var(--color-text)] lg:hidden"
+          ref="menuButton"
           :aria-label="mobileOpen ? 'Close menu' : 'Open menu'"
           :aria-expanded="mobileOpen"
           aria-controls="mobile-nav"

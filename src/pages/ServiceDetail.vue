@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { PortableText } from '@portabletext/vue';
+import { richTextComponents, withHeadingOrder } from '@/lib/richText';
 import { RouterLink } from 'vue-router';
 import { ArrowLeft } from 'lucide-vue-next';
 import { useSanityQuery } from '@/composables/useSanityQuery';
@@ -130,7 +131,7 @@ useHead({
 
     <div class="mx-auto max-w-3xl px-6 py-16 md:py-20">
       <div class="prose-body">
-        <PortableText v-if="service?.content?.length" :value="service.content" />
+        <PortableText v-if="service?.content?.length" :value="withHeadingOrder(service.content)" :components="richTextComponents" />
       </div>
 
       <div class="mt-14 rounded-lg bg-[var(--color-bg-card)] p-8 text-center shadow-sm ring-1 ring-[var(--color-border)]">

@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { PortableText } from '@portabletext/vue';
+import { richTextComponents, withHeadingOrder } from '@/lib/richText';
 import { useSanityQuery } from '@/composables/useSanityQuery';
 import { useSeo } from '@/composables/useSeo';
 import { useHashScroll } from '@/composables/useHashScroll';
@@ -50,7 +51,7 @@ useHashScroll(computed(() => Boolean(page.value)));
       <time :datetime="page?.lastUpdated">{{ formattedDate }}</time>
     </p>
     <div class="prose-body mt-8">
-      <PortableText v-if="page?.body?.length" :value="page.body" />
+      <PortableText v-if="page?.body?.length" :value="withHeadingOrder(page.body)" :components="richTextComponents" />
     </div>
   </main>
 </template>
