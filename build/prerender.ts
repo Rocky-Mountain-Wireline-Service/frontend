@@ -40,11 +40,31 @@ async function serviceRoutes(): Promise<string[]> {
 
 let discovered: string[] = [];
 
+/**
+ * When each route's content last changed, from Sanity. The sitemap used to
+ * stamp every page with the build date, which tells Google everything changed
+ * on every deploy — so it learns to ignore the date entirely.
+ */
+async function lastModified(): Promise<Map<string, string>> {
+  const dates = new Map<string, string>();
+  if (!client) return dates;
+  const rows = await client.fetch<{ type: string; slug: string; updated: string }[]>(
+    `*[_type in ["page", "servicePage", "legalPage"] && defined(slug.current)]{ "type": _type, "slug": slug.current, "updated": _updatedAt }`
+  );
+  for (const r of rows) {
+    const route = r.type === 'servicePage' ? `/services/${r.slug}` : r.slug;
+    dates.set(route, r.updated.slice(0, 10));
+  }
+  return dates;
+}
+
 export async function getPrerenderRoutes(_paths: string[]): Promise<string[]> {
   const services = await serviceRoutes();
   discovered = [...STATIC_ROUTES, ...services];
-  console.log(`[prerender] ${discovered.length} routes (${services.length} services)`);
-  return discovered;
+  console.log(`[prerender] ${discovered.length} routes (${services.length} services) + 404 page`);
+  // /404 renders the not-found page to dist/404.html, which Netlify serves with
+  // a 404 status for any address that has no file. It is not in the sitemap.
+  return [...discovered, '/404'];
 }
 
 /**
@@ -55,6 +75,7 @@ export async function getPrerenderRoutes(_paths: string[]): Promise<string[]> {
 export async function writeSitemap() {
   const routes = discovered.length ? discovered : STATIC_ROUTES;
   const today = new Date().toISOString().slice(0, 10);
+  const updated = await lastModified().catch(() => new Map<string, string>());
 
   const priority = (route: string) => {
     if (route === '/') return '1.0';
@@ -67,7 +88,7 @@ export async function writeSitemap() {
     .map(
       (route) => `  <url>
     <loc>${siteUrl}${route}</loc>
-    <lastmod>${today}</lastmod>
+    <lastmod>${updated.get(route) ?? today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>${priority(route)}</priority>
   </url>`

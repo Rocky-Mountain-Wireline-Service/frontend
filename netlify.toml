@@ -21,6 +21,13 @@
   status = 301
   force = true
 
+# The old site's sitemap address, which Search Console may still have on file.
+[[redirects]]
+  from = "/sitemap/*"
+  to = "/sitemap.xml"
+  status = 301
+  force = true
+
 # ─── Headers ─────────────────────────────────────────────────────────────────
 
 [[headers]]
@@ -37,12 +44,9 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# ─── SPA fallback ────────────────────────────────────────────────────────────
-# Every route is prerendered to its own HTML file, and Netlify serves those
-# first. This only catches client-side navigation to a path with no prerendered
-# file, and must stay last so it cannot shadow the redirects above.
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# ─── Not found ───────────────────────────────────────────────────────────────
+# Every page is prerendered to its own file, so there is no catch-all rewrite
+# to index.html: that answered any made-up address with the homepage and a 200,
+# which search engines treat as a "soft 404" and count against the site.
+# Netlify serves dist/404.html with a real 404 status instead. Navigation inside
+# the site is handled by the router in the browser and never reaches here.

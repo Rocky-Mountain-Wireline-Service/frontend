@@ -52,9 +52,17 @@ export function useSeo(input: MaybeRef<SeoInput> = {}) {
     return t.includes(SITE_NAME) ? t : `${t} - ${SITE_NAME}`;
   });
 
-  const description = computed(
-    () => seo.value.description || site.defaultSeo?.description || site.tagline || ''
-  );
+  /**
+   * Google shows about 155–160 characters; past that it cuts mid-word. Long
+   * descriptions (the service pages derive theirs from a card summary) are
+   * trimmed at the last whole word and given an ellipsis instead.
+   */
+  const description = computed(() => {
+    const text = (seo.value.description || site.defaultSeo?.description || site.tagline || '').replace(/\s+/g, ' ').trim();
+    if (text.length <= 158) return text;
+    const cut = text.slice(0, 155);
+    return `${cut.slice(0, cut.lastIndexOf(' ')).replace(/[,;:.…-]+$/, '')}…`;
+  });
 
   const canonical = computed(() => `${siteUrl}${route.path === '/' ? '/' : route.path}`);
 
@@ -85,25 +93,29 @@ export function useSeo(input: MaybeRef<SeoInput> = {}) {
     { immediate: true, flush: 'post' }
   );
 
+  // `meta` is computed, not a plain array. During the prerender a page's
+  // data arrives after this runs; a plain array decided whether to include
+  // og:image and robots once, before there was an image to include, so no page
+  // ever had a share image.
   useHead({
     title,
     link: [{ rel: 'canonical', href: canonical }],
-    meta: [
-      { name: 'description', content: description },
+    meta: computed(() => [
+      { name: 'description', content: description.value },
       ...(seo.value.noIndex || IS_PREVIEW ? [{ name: 'robots', content: 'noindex, nofollow' }] : []),
       { property: 'og:type', content: 'website' },
       { property: 'og:site_name', content: SITE_NAME },
-      { property: 'og:title', content: title },
-      { property: 'og:description', content: description },
-      { property: 'og:url', content: canonical },
+      { property: 'og:title', content: title.value },
+      { property: 'og:description', content: description.value },
+      { property: 'og:url', content: canonical.value },
       // An empty value is dropped by unhead, so no tag is emitted at all.
-      ...(image.value ? [{ property: 'og:image', content: image }] : []),
+      ...(image.value ? [{ property: 'og:image', content: image.value }, { property: 'og:image:width', content: '1200' }, { property: 'og:image:height', content: '630' }] : []),
       { property: 'og:locale', content: 'en_US' },
       { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:title', content: title },
-      { name: 'twitter:description', content: description },
-      ...(image.value ? [{ name: 'twitter:image', content: image }] : []),
-    ],
+      { name: 'twitter:title', content: title.value },
+      { name: 'twitter:description', content: description.value },
+      ...(image.value ? [{ name: 'twitter:image', content: image.value }] : []),
+    ]),
   });
 }
 
@@ -114,8 +126,22 @@ export function useSeo(input: MaybeRef<SeoInput> = {}) {
  * implementation declared a single address, which told search engines this was
  * a one-office business when it operates several.
  */
+const STATE_NAMES: Record<string, string> = { CO: 'Colorado', WY: 'Wyoming', UT: 'Utah', ND: 'North Dakota', NM: 'New Mexico', TX: 'Texas', MT: 'Montana' };
+
 export function useOrganizationSchema() {
   const site = useSiteShell();
+
+  // The footer's contact cards hold the main office's phone and email.
+  const cardValue = (pattern: RegExp) =>
+    site.footerContactCards.find((c) => c.href && pattern.test(c.href))?.value ?? '';
+  const mainPhone = computed(() => {
+    const digits = cardValue(/^tel:/).replace(/\D/g, '');
+    return digits.length === 10 ? `+1-${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}` : '';
+  });
+  const mainEmail = computed(() => cardValue(/^mailto:/));
+  const states = computed(() => [
+    ...new Set(site.locations.map((l) => STATE_NAMES[l.state?.toUpperCase()] ?? l.state).filter(Boolean)),
+  ]);
 
   useHead({
     script: computed(() => [
@@ -126,8 +152,16 @@ export function useOrganizationSchema() {
           '@type': 'Organization',
           name: site.name,
           url: siteUrl,
+          foundingDate: '1988',
           ...(site.logo ? { logo: site.logo } : {}),
           ...(site.tagline ? { description: site.tagline } : {}),
+          ...(mainPhone.value ? { telephone: mainPhone.value } : {}),
+          ...(mainEmail.value ? { email: mainEmail.value } : {}),
+          // Its social profiles, so search engines can tie them to the business.
+          ...(site.socialLinks.length ? { sameAs: site.socialLinks.map((s) => s.url) } : {}),
+          ...(states.value.length
+            ? { areaServed: states.value.map((name) => ({ '@type': 'State', name })) }
+            : {}),
           ...(site.locations.length
             ? {
                 location: site.locations.map((loc) => ({

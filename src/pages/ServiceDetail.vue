@@ -7,6 +7,7 @@ import { ArrowLeft } from 'lucide-vue-next';
 import { useSanityQuery } from '@/composables/useSanityQuery';
 import { useSeo } from '@/composables/useSeo';
 import { useHashScroll } from '@/composables/useHashScroll';
+import { useHead } from '@unhead/vue';
 import { track } from '@/lib/analytics';
 import { SERVICE_BY_SLUG } from '@/lib/queries';
 import SanityImage from '@/components/ui/SanityImage.vue';
@@ -50,6 +51,45 @@ useSeo(
 );
 
 useHashScroll(computed(() => Boolean(service.value)));
+
+/**
+ * Tells search engines what the page is (a service offered by RMWS) and where
+ * it sits (Home › Services › this service). The breadcrumb is what lets Google
+ * show "rmws.com › Services › Swabbing" in a result instead of a bare URL.
+ */
+const siteUrl = (import.meta.env.VITE_SITE_URL || 'https://rmws.com').replace(/\/$/, '');
+useHead({
+  script: computed(() =>
+    service.value
+      ? [
+          {
+            type: 'application/ld+json',
+            innerHTML: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@graph': [
+                {
+                  '@type': 'Service',
+                  name: service.value.title,
+                  serviceType: service.value.title,
+                  ...(derivedDescription.value ? { description: derivedDescription.value } : {}),
+                  url: `${siteUrl}/services/${slug.value}`,
+                  provider: { '@type': 'Organization', name: 'Rocky Mountain Wireline Service', url: siteUrl },
+                },
+                {
+                  '@type': 'BreadcrumbList',
+                  itemListElement: [
+                    { '@type': 'ListItem', position: 1, name: 'Home', item: `${siteUrl}/` },
+                    { '@type': 'ListItem', position: 2, name: 'Services', item: `${siteUrl}/services` },
+                    { '@type': 'ListItem', position: 3, name: service.value.title, item: `${siteUrl}/services/${slug.value}` },
+                  ],
+                },
+              ],
+            }),
+          },
+        ]
+      : []
+  ),
+});
 </script>
 
 <template>
