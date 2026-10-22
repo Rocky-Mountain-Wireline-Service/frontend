@@ -58,6 +58,9 @@ export async function storeSubmission(input: {
   pagePath: string;
   fields: StoredField[];
   files: StoredFile[];
+  /** Defaults to 'new'; likely spam is filed as 'archived' with a note. */
+  status?: 'new' | 'archived';
+  notes?: string;
 }): Promise<void> {
   const { databaseUrl, authToken } = JSON.parse(process.env.TURSO_CONFIG || '{}');
   const clientId = process.env.FORMS_CLIENT_ID;
@@ -74,8 +77,8 @@ export async function storeSubmission(input: {
     [
       {
         sql: `INSERT INTO form_submissions
-                (id, client_id, kind, form_slug, form_title, name, email, phone, fields, page_path)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                (id, client_id, kind, form_slug, form_title, name, email, phone, fields, page_path, status, notes)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [
           id,
           clientId,
@@ -87,6 +90,8 @@ export async function storeSubmission(input: {
           who.phone,
           JSON.stringify(input.fields),
           input.pagePath || null,
+          input.status ?? 'new',
+          input.notes ?? null,
         ],
       },
       ...input.files.map((file) => {

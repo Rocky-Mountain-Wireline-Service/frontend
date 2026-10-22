@@ -36,8 +36,26 @@
     X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
-    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+    # rmws.com only. includeSubDomains would also force HTTPS on every company
+    # subdomain, including Microsoft 365 and any device the client runs on one.
+    Strict-Transport-Security = "max-age=31536000"
+    # What the site may load. 'unsafe-inline' scripts are needed for the two
+    # inline scripts every page carries (the dark-mode setter, and the page data
+    # vite-ssg writes, which differs per page so cannot be hashed); everything
+    # else is held to the site itself, Sanity, Google Analytics and the map.
+    Content-Security-Policy = """default-src 'self'; \
+      script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; \
+      style-src 'self' 'unsafe-inline'; \
+      img-src 'self' data: https://cdn.sanity.io https://*.google-analytics.com https://*.googletagmanager.com; \
+      font-src 'self' data:; \
+      connect-src 'self' https://29kbekqj.api.sanity.io https://29kbekqj.apicdn.sanity.io https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; \
+      frame-src https://www.google.com https://maps.google.com https://www.openstreetmap.org; \
+      object-src 'none'; \
+      base-uri 'self'; \
+      form-action 'self'; \
+      frame-ancestors 'self'; \
+      upgrade-insecure-requests"""
 
 [[headers]]
   for = "/assets/*"

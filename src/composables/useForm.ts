@@ -1,4 +1,4 @@
-import { computed, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { trackLead } from '@/lib/analytics';
 import type { DynamicForm, FormField } from '@/types/content';
 
@@ -38,8 +38,11 @@ function readAsBase64(file: File): Promise<string> {
  *      plausibly read it was almost certainly automated.
  *
  * Both are checked again in the Netlify function — a client-side check only
- * filters naive bots, since anything can POST the endpoint directly.
+ * filters naive bots, since anything can POST the endpoint directly. There the
+ * timing rests on a token the server signs when the form appears, not on the
+ * browser's own clock (netlify/lib/formGuard.ts).
  */
+const ENDPOINT = '/api/send-message';
 export function useForm(form: () => DynamicForm | null | undefined) {
   const values = reactive<Record<string, string>>({});
   const files = reactive<Record<string, File | null>>({});
@@ -48,6 +51,17 @@ export function useForm(form: () => DynamicForm | null | undefined) {
   const formError = ref('');
   const honeypot = ref('');
   const startedAt = ref(Date.now());
+  const token = ref('');
+
+  async function fetchToken() {
+    try {
+      const res = await fetch(ENDPOINT, { cache: 'no-store' });
+      token.value = res.ok ? ((await res.json()).token ?? '') : '';
+    } catch {
+      token.value = '';
+    }
+  }
+  onMounted(fetchToken);
 
   const fields = computed<FormField[]>(() => form()?.fields ?? []);
 
@@ -57,6 +71,7 @@ export function useForm(form: () => DynamicForm | null | undefined) {
     clearErrors();
     honeypot.value = '';
     startedAt.value = Date.now();
+    void fetchToken();
   }
 
   function clearErrors() {
@@ -139,7 +154,9 @@ export function useForm(form: () => DynamicForm | null | undefined) {
         });
       }
 
-      const res = await fetch('/.netlify/functions/send-message', {
+      // A token that failed to load when the form appeared gets one more try.
+      if (!token.value) await fetchToken();
+      const res = await fetch(ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -147,7 +164,7 @@ export function useForm(form: () => DynamicForm | null | undefined) {
           formTitle: def.title,
           formSlug: def.slug,
           pagePath: window.location.pathname,
-          elapsedSeconds: Math.round((Date.now() - startedAt.value) / 1000),
+          token: token.value,
           website: honeypot.value,
           fields: fields.value
             .filter((f) => f.type !== 'file')
