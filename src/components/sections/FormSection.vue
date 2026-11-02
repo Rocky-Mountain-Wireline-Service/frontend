@@ -265,7 +265,7 @@ const submitClass = computed(() =>
               ]"
             >
               <Paperclip :size="16" aria-hidden="true" />
-              <span class="min-w-0 break-words">{{ files[field.name]?.name || 'Choose a file (max 4MB)' }}</span>
+              <span class="min-w-0 break-words">{{ files[field.name]?.name || 'Choose a file (max 3MB)' }}</span>
               <input
                 :id="fieldId(field.name)"
                 type="file"

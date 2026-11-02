@@ -17,7 +17,7 @@ import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 const MAX_TOKEN_AGE_SECONDS = 24 * 60 * 60;
 
 function signingKey(): string | null {
-  const base = process.env.FORM_TOKEN_SECRET || process.env.RESEND_API_KEY || process.env.TURSO_CONFIG;
+  const base = process.env.FORM_TOKEN_SECRET || process.env.RESEND_API_KEY || process.env.FORMS_INTAKE_SECRET;
   return base ? createHash('sha256').update(`rmws-form-token:${base}`).digest('hex') : null;
 }
 

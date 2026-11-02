@@ -1,16 +1,17 @@
-import { createClient } from '@libsql/client/web';
-
 /**
  * Keeps a copy of each form submission so the client's dashboard can list and
  * manage them. Email alone meant a submission existed only in someone's inbox:
  * nothing to search, no record of what had been dealt with, and a résumé lost
  * the moment a message was deleted.
  *
- * Env:
- *   TURSO_CONFIG      {"databaseUrl":"…","authToken":"…"}
- *   FORMS_CLIENT_ID   this site's client ID in that database
+ * Posted to the dashboard's form-submissions function, which stores it in the
+ * agency database through the Pipeline. The site holds no database credential:
+ * the shared secret can add a submission to this client's inbox and nothing
+ * else.
  *
- * The tables are created by the dashboard repo (db/form-submissions.sql).
+ * Env:
+ *   FORMS_INTAKE_URL      the dashboard's form-submissions function
+ *   FORMS_INTAKE_SECRET   shared with the dashboard; sent as X-Forms-Secret
  */
 
 export interface StoredField {
@@ -26,30 +27,11 @@ export interface StoredFile {
   content: string;
 }
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** Long enough for the dashboard and the Pipeline to store a résumé, short of the function's own limit. */
+const INTAKE_TIMEOUT_MS = 8000;
 
 export function storeConfigured(): boolean {
-  return Boolean(process.env.TURSO_CONFIG && process.env.FORMS_CLIENT_ID);
-}
-
-/** Which inbox a form belongs in, from what the form is called. */
-export function kindOf(slug: string, title: string): 'contact' | 'application' | 'other' {
-  const text = `${slug} ${title}`.toLowerCase();
-  if (/employ|applic|career|job|hiring/.test(text)) return 'application';
-  if (/contact|sales|inquir|enquir|quote|message/.test(text)) return 'contact';
-  return 'other';
-}
-
-/** The person's name, email and phone, found among whatever fields the form has. */
-function identify(fields: StoredField[]) {
-  const byName = (pattern: RegExp) =>
-    fields.find((f) => pattern.test(f.name.toLowerCase()) && f.value.trim())?.value.trim() ?? '';
-
-  const full = byName(/^(full)?name$/);
-  const name = full || [byName(/^first/), byName(/^last/)].filter(Boolean).join(' ');
-  const email = fields.find((f) => EMAIL.test(f.value.trim()))?.value.trim() ?? '';
-  const phone = byName(/^(mobile)?phone$/) || byName(/phone|tel/);
-  return { name: name || null, email: email || null, phone: phone || null };
+  return Boolean(process.env.FORMS_INTAKE_URL && process.env.FORMS_INTAKE_SECRET);
 }
 
 export async function storeSubmission(input: {
@@ -62,48 +44,18 @@ export async function storeSubmission(input: {
   status?: 'new' | 'archived';
   notes?: string;
 }): Promise<void> {
-  const { databaseUrl, authToken } = JSON.parse(process.env.TURSO_CONFIG || '{}');
-  const clientId = process.env.FORMS_CLIENT_ID;
-  if (!databaseUrl || !authToken || !clientId) throw new Error('Submission store is not configured');
+  const url = process.env.FORMS_INTAKE_URL;
+  const secret = process.env.FORMS_INTAKE_SECRET;
+  if (!url || !secret) throw new Error('Submission store is not configured');
 
-  const db = createClient({ url: databaseUrl, authToken });
-  // Generated here rather than by the database so the files can name the
-  // submission they belong to within the same batch.
-  const id = crypto.randomUUID().replace(/-/g, '');
-  const who = identify(input.fields);
-
-  // One transaction: a submission never lands without its résumé, or the reverse.
-  await db.batch(
-    [
-      {
-        sql: `INSERT INTO form_submissions
-                (id, client_id, kind, form_slug, form_title, name, email, phone, fields, page_path, status, notes)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        args: [
-          id,
-          clientId,
-          kindOf(input.formSlug, input.formTitle),
-          input.formSlug || null,
-          input.formTitle,
-          who.name,
-          who.email,
-          who.phone,
-          JSON.stringify(input.fields),
-          input.pagePath || null,
-          input.status ?? 'new',
-          input.notes ?? null,
-        ],
-      },
-      ...input.files.map((file) => {
-        const bytes = Buffer.from(file.content, 'base64');
-        return {
-          sql: `INSERT INTO form_submission_files
-                  (submission_id, client_id, filename, content_type, size, content)
-                VALUES (?, ?, ?, ?, ?, ?)`,
-          args: [id, clientId, file.filename, file.contentType || null, bytes.length, bytes],
-        };
-      }),
-    ],
-    'write'
-  );
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Forms-Secret': secret },
+    body: JSON.stringify(input),
+    signal: AbortSignal.timeout(INTAKE_TIMEOUT_MS),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    throw new Error(`Dashboard intake returned ${res.status}${detail ? `: ${detail.slice(0, 200)}` : ''}`);
+  }
 }

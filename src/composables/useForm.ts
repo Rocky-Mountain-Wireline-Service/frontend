@@ -2,8 +2,8 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { trackLead } from '@/lib/analytics';
 import type { DynamicForm, FormField } from '@/types/content';
 
-/** Netlify caps a function request at 6MB; base64 inflates a file by about a third. */
-const MAX_FILE_BYTES = 4 * 1024 * 1024;
+/** Matches the server's limit (send-message.ts), which the dashboard inbox sets. */
+const MAX_FILE_BYTES = 3 * 1024 * 1024;
 
 export type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -81,7 +81,7 @@ export function useForm(form: () => DynamicForm | null | undefined) {
 
   function setFile(name: string, file: File | null) {
     if (file && file.size > MAX_FILE_BYTES) {
-      errors[name] = 'That file is larger than 4MB. Please attach a smaller one.';
+      errors[name] = 'That file is larger than 3MB. Please attach a smaller one.';
       files[name] = null;
       return;
     }
