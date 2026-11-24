@@ -230,7 +230,9 @@ export default async (req: Request, _context: Context) => {
   };
 
   const email = async () => {
-    const to = form?.notifyEmail && EMAIL.test(form.notifyEmail.trim()) ? form.notifyEmail.trim() : DEFAULT_TO_EMAIL;
+    // "Send submissions to" may list several addresses, separated by commas.
+    const listed = (form?.notifyEmail ?? '').split(/[,;\s]+/).filter((a) => EMAIL.test(a)).slice(0, 10);
+    const to = listed.length ? listed : [DEFAULT_TO_EMAIL];
     const { error } = await new Resend(process.env.RESEND_API_KEY).emails.send({
       from: FROM_EMAIL,
       to,
