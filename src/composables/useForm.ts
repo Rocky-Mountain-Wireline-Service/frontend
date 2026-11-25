@@ -1,5 +1,6 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import { trackLead } from '@/lib/analytics';
+import { useTurnstile } from '@/composables/useTurnstile';
 import type { DynamicForm, FormField } from '@/types/content';
 
 /** Netlify caps a function request at 6MB; base64 inflates a file by about a third. */
@@ -41,6 +42,10 @@ function readAsBase64(file: File): Promise<string> {
  * filters naive bots, since anything can POST the endpoint directly. There the
  * timing rests on a token the server signs when the form appears, not on the
  * browser's own clock (netlify/lib/formGuard.ts).
+ *
+ * When the server has Turnstile configured it sends a site key with the token,
+ * and the form carries a Turnstile token too. Bind `turnstileEl` to the element
+ * the widget should render in.
  */
 const ENDPOINT = '/api/send-message';
 export function useForm(form: () => DynamicForm | null | undefined) {
@@ -52,11 +57,16 @@ export function useForm(form: () => DynamicForm | null | undefined) {
   const honeypot = ref('');
   const startedAt = ref(Date.now());
   const token = ref('');
+  const turnstileSiteKey = ref('');
+  const turnstileEl = ref<HTMLElement | null>(null);
+  const turnstile = useTurnstile(turnstileSiteKey, turnstileEl);
 
   async function fetchToken() {
     try {
       const res = await fetch(ENDPOINT, { cache: 'no-store' });
-      token.value = res.ok ? ((await res.json()).token ?? '') : '';
+      const data = res.ok ? await res.json() : {};
+      token.value = data.token ?? '';
+      turnstileSiteKey.value = data.turnstileSiteKey ?? '';
     } catch {
       token.value = '';
     }
@@ -139,6 +149,13 @@ export function useForm(form: () => DynamicForm | null | undefined) {
       return;
     }
 
+    // Turnstile usually clears within a second or two of the form appearing.
+    if (turnstileSiteKey.value && !turnstile.token.value) {
+      formError.value = 'One moment, we are still verifying this form. Please try again in a few seconds.';
+      status.value = 'error';
+      return;
+    }
+
     status.value = 'submitting';
     formError.value = '';
 
@@ -165,6 +182,7 @@ export function useForm(form: () => DynamicForm | null | undefined) {
           formSlug: def.slug,
           pagePath: window.location.pathname,
           token: token.value,
+          turnstileToken: turnstile.token.value,
           website: honeypot.value,
           fields: fields.value
             .filter((f) => f.type !== 'file')
@@ -184,8 +202,11 @@ export function useForm(form: () => DynamicForm | null | undefined) {
     } catch (err) {
       formError.value = err instanceof Error ? err.message : 'Something went wrong.';
       status.value = 'error';
+    } finally {
+      // Each Turnstile token is good for one attempt, successful or not.
+      turnstile.reset();
     }
   }
 
-  return { values, files, errors, status, formError, honeypot, fields, setFile, submit, reset };
+  return { values, files, errors, status, formError, honeypot, fields, setFile, submit, reset, turnstileEl };
 }

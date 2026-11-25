@@ -16,7 +16,7 @@ const props = defineProps<{
 }>();
 
 const definition = computed(() => props.section.form ?? null);
-const { values, files, errors, status, formError, honeypot, fields, setFile, submit } = useForm(
+const { values, files, errors, status, formError, honeypot, fields, setFile, submit, turnstileEl } = useForm(
   () => definition.value
 );
 
@@ -298,6 +298,9 @@ const submitClass = computed(() =>
               {{ errors[field.name] }}
             </p>
           </div>
+
+          <!-- Cloudflare Turnstile, when configured: invisible unless a visitor has to click to confirm. -->
+          <div ref="turnstileEl" class="col-span-6 empty:hidden"></div>
 
           <button
             type="submit"

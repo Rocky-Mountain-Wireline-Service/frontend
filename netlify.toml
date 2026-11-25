@@ -43,14 +43,15 @@
     # What the site may load. 'unsafe-inline' scripts are needed for the two
     # inline scripts every page carries (the dark-mode setter, and the page data
     # vite-ssg writes, which differs per page so cannot be hashed); everything
-    # else is held to the site itself, Sanity, Google Analytics and the map.
+    # else is held to the site itself, Sanity, Google Analytics, the map and
+    # Cloudflare Turnstile on the forms.
     Content-Security-Policy = """default-src 'self'; \
-      script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; \
+      script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://challenges.cloudflare.com; \
       style-src 'self' 'unsafe-inline'; \
       img-src 'self' data: https://cdn.sanity.io https://*.google-analytics.com https://*.googletagmanager.com; \
       font-src 'self' data:; \
       connect-src 'self' https://29kbekqj.api.sanity.io https://29kbekqj.apicdn.sanity.io https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; \
-      frame-src https://www.google.com https://maps.google.com https://www.openstreetmap.org; \
+      frame-src https://www.google.com https://maps.google.com https://www.openstreetmap.org https://challenges.cloudflare.com; \
       object-src 'none'; \
       base-uri 'self'; \
       form-action 'self'; \
