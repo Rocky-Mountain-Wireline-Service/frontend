@@ -1,7 +1,17 @@
 import type { Config, Context } from '@netlify/functions';
 import { Resend } from 'resend';
 import { storeConfigured, storeSubmission } from '../lib/submissions';
-import { checkAttachment, checkToken, fromThisSite, issueToken, spamReason, type CheckedFile } from '../lib/formGuard';
+import {
+  checkAttachment,
+  checkToken,
+  checkTurnstile,
+  fromThisSite,
+  issueToken,
+  spamReason,
+  turnstileSiteKey,
+  type CheckedFile,
+} from '../lib/formGuard';
+import { isRepeat } from '../lib/repeats';
 
 const DEFAULT_TO_EMAIL = process.env.CONTACT_TO_EMAIL || 'sales@rmws.com';
 const FROM_EMAIL = process.env.CONTACT_FROM_EMAIL || 'onboarding@resend.dev';
@@ -29,6 +39,7 @@ interface Submission {
   attachments?: { filename?: string; contentType?: string; content?: string }[];
   website?: string;
   token?: string;
+  turnstileToken?: string;
 }
 
 interface FormDefinition {
@@ -107,13 +118,13 @@ function renderValue(value: string): string {
   return safe.replace(/\n/g, '<br />');
 }
 
-export default async (req: Request, _context: Context) => {
+export default async (req: Request, context: Context) => {
   // GET hands the page a signed token when a form appears (see formGuard.ts).
   // `ready` doubles as the uptime monitor's check: false means the site has
   // lost both delivery routes (email and dashboard) and inquiries would fail.
   if (req.method === 'GET') {
     const ready = Boolean(process.env.RESEND_API_KEY) || storeConfigured();
-    return new Response(JSON.stringify({ token: issueToken(), ready }), {
+    return new Response(JSON.stringify({ token: issueToken(), turnstileSiteKey: turnstileSiteKey(), ready }), {
       headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
     });
   }
@@ -154,6 +165,10 @@ export default async (req: Request, _context: Context) => {
   const tokenProblem = checkToken(body.token, form?.minimumSeconds ?? MIN_ELAPSED_SECONDS);
   if (tokenProblem) {
     return json({ error: tokenProblem }, 400);
+  }
+  const turnstileProblem = await checkTurnstile(body.turnstileToken, context.ip ?? null);
+  if (turnstileProblem) {
+    return json({ error: turnstileProblem }, 400);
   }
 
   // Only the fields the form defines, labeled as the Studio labels them. When
@@ -201,7 +216,16 @@ export default async (req: Request, _context: Context) => {
 
   const formTitle = (form?.title || body.formTitle || 'Website inquiry').replace(/[\r\n]+/g, ' ').slice(0, 200);
   const formSlug = form?.slug ?? String(body.formSlug ?? '').slice(0, 120);
-  const spam = spamReason(fields.map((f) => f.value));
+  // Job applications keep the looser content rules; everything else is held to
+  // what a customer's inquiry looks like (formGuard.ts).
+  const sales = !/employ|applic|career|job|hiring/i.test(`${formSlug} ${formTitle}`);
+  const messageNames = new Set(form?.fields?.filter((f) => f.type === 'textarea').map((f) => f.name));
+  const message = fields.filter((f) => messageNames.has(f.name)).map((f) => f.value).join('\n');
+  const spam =
+    spamReason(fields.map((f) => f.value), { sales }) ??
+    (sales && message && (await isRepeat(body.formId ?? formSlug, message))
+      ? 'repeats a message sent recently under another name'
+      : null);
 
   // Reply-To is what makes the notification useful: hitting reply reaches the
   // person who filled in the form rather than the sending domain.
