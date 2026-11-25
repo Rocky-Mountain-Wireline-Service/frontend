@@ -26,7 +26,9 @@ export default defineConfig(({ mode }) => {
     },
     ssgOptions: {
       script: 'async',
-      formatting: 'minify',
+      // No HTML minifying: it trims whitespace inside text, which then no longer
+      // matches what Vue renders, and each difference is patched on hydration.
+      formatting: 'none',
       // Routes come from the CMS, not the file system: service detail pages
       // only exist because a `servicePage` document does.
       includedRoutes: async (paths: string[]) => {
