@@ -1,14 +1,27 @@
 import type { Config, Context } from '@netlify/functions';
 import { Resend } from 'resend';
 import { storeConfigured, storeSubmission } from '../lib/submissions';
-import { checkAttachment, checkToken, fromThisSite, issueToken, spamReason, type CheckedFile } from '../lib/formGuard';
+import {
+  checkAttachment,
+  checkToken,
+  checkTurnstile,
+  fromThisSite,
+  issueToken,
+  spamReason,
+  turnstileSiteKey,
+  type CheckedFile,
+} from '../lib/formGuard';
+import { isRepeat } from '../lib/repeats';
 
 const DEFAULT_TO_EMAIL = process.env.CONTACT_TO_EMAIL || 'sales@rmws.com';
 const FROM_EMAIL = process.env.CONTACT_FROM_EMAIL || 'onboarding@resend.dev';
 const SITE_DOMAIN = process.env.SITE_DOMAIN || 'rmws.com';
 
-/** Netlify caps a function request at 6MB. Base64 inflates a file by about a third. */
-const MAX_TOTAL_ATTACHMENT_BYTES = 4 * 1024 * 1024;
+/**
+ * Netlify caps a function request at 6MB, and the Pipeline's inbox at 5.5MB.
+ * Base64 inflates a file by about a third, so 3MB arrives as about 4.2MB.
+ */
+const MAX_TOTAL_ATTACHMENT_BYTES = 3 * 1024 * 1024;
 const MIN_ELAPSED_SECONDS = 3;
 
 const BRAND = '#710a0c';
@@ -26,6 +39,7 @@ interface Submission {
   attachments?: { filename?: string; contentType?: string; content?: string }[];
   website?: string;
   token?: string;
+  turnstileToken?: string;
 }
 
 interface FormDefinition {
@@ -104,13 +118,13 @@ function renderValue(value: string): string {
   return safe.replace(/\n/g, '<br />');
 }
 
-export default async (req: Request, _context: Context) => {
+export default async (req: Request, context: Context) => {
   // GET hands the page a signed token when a form appears (see formGuard.ts).
   // `ready` doubles as the uptime monitor's check: false means the site has
   // lost both delivery routes (email and dashboard) and inquiries would fail.
   if (req.method === 'GET') {
     const ready = Boolean(process.env.RESEND_API_KEY) || storeConfigured();
-    return new Response(JSON.stringify({ token: issueToken(), ready }), {
+    return new Response(JSON.stringify({ token: issueToken(), turnstileSiteKey: turnstileSiteKey(), ready }), {
       headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
     });
   }
@@ -152,6 +166,10 @@ export default async (req: Request, _context: Context) => {
   if (tokenProblem) {
     return json({ error: tokenProblem }, 400);
   }
+  const turnstileProblem = await checkTurnstile(body.turnstileToken, context.ip ?? null);
+  if (turnstileProblem) {
+    return json({ error: turnstileProblem }, 400);
+  }
 
   // Only the fields the form defines, labeled as the Studio labels them. When
   // Sanity could not be reached, the request's fields are kept, trimmed.
@@ -184,7 +202,7 @@ export default async (req: Request, _context: Context) => {
     0
   );
   if (totalBytes > MAX_TOTAL_ATTACHMENT_BYTES) {
-    return json({ error: 'Those attachments are too large. Please keep them under 4MB.' }, 413);
+    return json({ error: 'Those attachments are too large. Please keep them under 3MB.' }, 413);
   }
   const fileSlots = form?.fields ? form.fields.filter((f) => f.type === 'file').length : 1;
   if (attachments.length > fileSlots) {
@@ -198,7 +216,16 @@ export default async (req: Request, _context: Context) => {
 
   const formTitle = (form?.title || body.formTitle || 'Website inquiry').replace(/[\r\n]+/g, ' ').slice(0, 200);
   const formSlug = form?.slug ?? String(body.formSlug ?? '').slice(0, 120);
-  const spam = spamReason(fields.map((f) => f.value));
+  // Job applications keep the looser content rules; everything else is held to
+  // what a customer's inquiry looks like (formGuard.ts).
+  const sales = !/employ|applic|career|job|hiring/i.test(`${formSlug} ${formTitle}`);
+  const messageNames = new Set(form?.fields?.filter((f) => f.type === 'textarea').map((f) => f.name));
+  const message = fields.filter((f) => messageNames.has(f.name)).map((f) => f.value).join('\n');
+  const spam =
+    spamReason(fields.map((f) => f.value), { sales }) ??
+    (sales && message && (await isRepeat(body.formId ?? formSlug, message))
+      ? 'repeats a message sent recently under another name'
+      : null);
 
   // Reply-To is what makes the notification useful: hitting reply reaches the
   // person who filled in the form rather than the sending domain.

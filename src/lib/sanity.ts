@@ -13,9 +13,10 @@ export const hasSanity = Boolean(projectId);
  * competing with the hero photograph for bandwidth.
  *
  * The CDN host is used in the browser and the live API during the build, so a
- * deploy never publishes content the CDN has not caught up with yet. In
- * practice the browser rarely queries at all: every route is prerendered and
- * its data arrives hydrated.
+ * deploy never publishes content the CDN has not caught up with yet. Every
+ * route is prerendered with its data hydrated; the browser queries once per
+ * query after loading, to pick up anything published since the build
+ * (useSanityQuery.ts), and for pages reached by navigation.
  */
 const host = import.meta.env.SSR ? 'api.sanity.io' : 'apicdn.sanity.io';
 

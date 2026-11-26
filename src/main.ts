@@ -41,5 +41,9 @@ export const createApp = ViteSSG(
     } else {
       initialState.pinia = pinia.state.value;
     }
-  }
+  },
+  // Adopt the prerendered page rather than replace it. vite-ssg defaults to a
+  // fresh client render, which threw away the served HTML and drew every page
+  // a second time once the script ran.
+  { hydration: true }
 );

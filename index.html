@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Every page opens on a photograph served by Sanity's image CDN. Connecting
+         while the HTML is still arriving takes that setup off the hero's path. -->
+    <link rel="preconnect" href="https://cdn.sanity.io" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
